@@ -8,10 +8,13 @@ import {
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../hooks/useAuth';
+import ThemeToggle from '../Common/ThemeToggle';
+import Logo from '../Common/Logo';
 
 const Header: React.FC = () => {
   const { cart } = useCart();
@@ -70,17 +73,14 @@ const Header: React.FC = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="text-2xl font-bold bg-white text-blue-600 px-3 py-1 rounded-lg"
-              >
-                SHOPPC
+                        <Link to="/" className="flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
+              <motion.div whileHover={{ scale: 1.04 }}>
+                <Logo variant="light" />
               </motion.div>
             </Link>
 
             {/* Desktop Search Bar */}
-            <form onSubmit={handleSearch} className="hidden md:block flex-1 max-w-md">
+            <form onSubmit={handleSearch} className="hidden md:block flex-1 min-w-[180px] max-w-md">
               <div className="relative">
                 <input
                   type="text"
@@ -121,22 +121,35 @@ const Header: React.FC = () => {
               >
                 Phụ kiện
               </Link>
+              <Link
+                to="/build-pc"
+                className={`rounded-full bg-yellow-400 px-3 py-1 font-semibold text-blue-950 hover:bg-yellow-300 transition-colors ${location.pathname === '/build-pc' ? 'ring-2 ring-white' : ''}`}
+              >
+                Build PC
+              </Link>
 
               {isAuthenticated ? (
                 <div className="flex items-center gap-4">
                   <Link to="/account" className="flex items-center gap-2 hover:text-yellow-300 transition-colors group">
-                    <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-blue-800 font-bold">
+                    <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-blue-950 font-bold">
                       {getInitial()}
                     </div>
                     <span className="max-w-[120px] truncate">{displayName}</span>
                   </Link>
+                  <Link to="/account/orders" title="Đơn hàng của tôi" aria-label="Đơn hàng của tôi" className="flex items-center gap-1 hover:text-yellow-300 transition-colors">
+                    <ClipboardDocumentListIcon className="h-5 w-5" />
+                    {/* Chỉ hiện biểu tượng (rê chuột thấy chữ) để ô tìm kiếm không bị ép hẹp */}
+                    <span className="sr-only">Đơn hàng</span>
+                  </Link>
                   <button
                     type="button"
                     onClick={handleLogout}
+                    title="Đăng xuất"
+                    aria-label="Đăng xuất"
                     className="flex items-center gap-1 hover:text-yellow-300 transition-colors"
                   >
                     <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                    <span>Đăng xuất</span>
+                    <span className="sr-only">Đăng xuất</span>
                   </button>
                 </div>
               ) : (
@@ -146,6 +159,7 @@ const Header: React.FC = () => {
               )}
               
               {/* Cart Button */}
+              <ThemeToggle variant="onBrand" />
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsCartOpen(true)}
@@ -153,14 +167,15 @@ const Header: React.FC = () => {
               >
                 <ShoppingCartIcon className="h-6 w-6" />
                 {cart.total_items > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-yellow-400 text-blue-900 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-yellow-400 text-blue-950 text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                     {cart.total_items}
                   </span>
                 )}
               </motion.button>
             </nav>
 
-            {/* Mobile Menu Button */}
+            {/* Mobile: nút giao diện + menu */}
+            <ThemeToggle variant="onBrand" className="md:hidden" />
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden p-2 rounded-lg hover:bg-blue-800 transition-colors"
@@ -229,6 +244,13 @@ const Header: React.FC = () => {
               >
                 🔧 Linh kiện
               </Link>
+              <Link
+                to="/build-pc"
+                className="text-gray-700 hover:text-blue-600 py-2 font-semibold transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                🛠️ Build PC
+              </Link>
               <Link 
                 to="/products?type=peripheral" 
                 className="text-gray-700 hover:text-blue-600 py-2 transition-colors"
@@ -249,6 +271,14 @@ const Header: React.FC = () => {
                         {getInitial()}
                       </div>
                       <span>{displayName}</span>
+                    </Link>
+                    <Link
+                      to="/account/orders"
+                      className="flex items-center gap-3 text-gray-700 hover:text-blue-600 py-2 transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <ClipboardDocumentListIcon className="h-5 w-5" />
+                      Đơn hàng của tôi
                     </Link>
                     <button
                       onClick={handleLogout}

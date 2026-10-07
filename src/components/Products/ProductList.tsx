@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Product } from '../../types';
 import ProductCard from './ProductCard';
+import { PRODUCT_GRID } from '../../utils/layout';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface ProductListProps {
@@ -35,7 +36,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, itemsPerPage = 12 }
 
   return (
     <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className={PRODUCT_GRID}>
         {currentProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

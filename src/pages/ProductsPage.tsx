@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { productService } from '../services/productService';
 import { categoryService } from '../services/categoryService';
@@ -6,20 +6,26 @@ import { Product, Category } from '../types';
 import ProductCard from '../components/Products/ProductCard';
 import ProductFilter from '../components/Products/ProductFilter';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
+import { PRODUCT_GRID } from '../utils/layout';
 
 const ProductsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const latest = useRef(0);
+  // ?category=<id> (từ "Xem thêm" ở mục Sản phẩm tương tự) chọn sẵn danh mục
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(() => Number(searchParams.get('category')) || null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
 
   const typeParam = searchParams.get('type');
   const searchParam = searchParams.get('search');
 
   useEffect(() => {
+    const ticket = ++latest.current; // bỏ qua kết quả cũ nếu người dùng đã đổi bộ lọc tiếp
     const fetchData = async () => {
+      setRefreshing(true);
       try {
         const [allCategories, productList] = await Promise.all([
           categoryService.getAllCategories(),
@@ -30,12 +36,16 @@ const ProductsPage: React.FC = () => {
           })
         ]);
         
+        if (ticket !== latest.current) return;
         setCategories(allCategories);
         setProducts(productList);
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
-        setLoading(false);
+        if (ticket === latest.current) {
+          setLoading(false);
+          setRefreshing(false);
+        }
       }
     };
 
@@ -70,7 +80,7 @@ const ProductsPage: React.FC = () => {
               <p className="text-gray-500">Không tìm thấy sản phẩm nào</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className={`${PRODUCT_GRID.replace('lg:grid-cols-4', 'xl:grid-cols-4')} transition-opacity duration-200 ${refreshing ? 'opacity-60' : ''}`} aria-busy={refreshing}>
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

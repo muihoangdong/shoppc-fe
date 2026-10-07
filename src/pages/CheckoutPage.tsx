@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useCart } from '../hooks/useCart';
 import { formatPrice } from '../utils/formatters';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { orderService } from '../services/orderService';
+import { couponService, CouponCheck } from '../services/couponService';
+import { errorMessage, errorStatus } from '../services/api';
 
 interface CheckoutForm {
   fullName: string;
@@ -28,6 +30,47 @@ const CheckoutPage: React.FC = () => {
     note: '',
     paymentMethod: 'cod',
   });
+  // Mã giảm giá: số tiền giảm do server tính; đơn hàng vẫn được kiểm tra lại lúc đặt
+  const [couponInput, setCouponInput] = useState('');
+  const [coupon, setCoupon] = useState<CouponCheck | null>(null);
+  const [couponError, setCouponError] = useState('');
+  const [checkingCoupon, setCheckingCoupon] = useState(false);
+
+  const applyCoupon = async (code: string, quiet = false) => {
+    const trimmed = code.trim();
+    if (!trimmed) {
+      setCouponError('Nhập mã giảm giá');
+      return;
+    }
+    setCheckingCoupon(true);
+    setCouponError('');
+    try {
+      const result = await couponService.check(trimmed, { phone: formData.phone, email: formData.email });
+      setCoupon(result);
+      setCouponInput(result.code);
+      if (!quiet) toast.success(`Đã áp dụng mã ${result.code}`);
+    } catch (error) {
+      setCoupon(null);
+      setCouponError(errorMessage(error, 'Không kiểm tra được mã, vui lòng thử lại'));
+    } finally {
+      setCheckingCoupon(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCoupon(null);
+    setCouponError('');
+    setCouponInput('');
+  };
+
+  // Giỏ hàng đổi (thêm/bớt sản phẩm ở tab khác) -> tính lại mã đang dùng
+  const cartTotalRef = useRef(cart.total);
+  useEffect(() => {
+    if (cartTotalRef.current === cart.total) return;
+    cartTotalRef.current = cart.total;
+    if (coupon) void applyCoupon(coupon.code, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cart.total]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -54,12 +97,16 @@ const CheckoutPage: React.FC = () => {
         customer_city: formData.city,
         note: formData.note,
         payment_method: formData.paymentMethod,
+        coupon_code: coupon?.code,
       });
       toast.success(`Đặt hàng thành công! Mã đơn: ${order.order_code}`);
+      // Sang trang đơn hàng trước (có mã QR nếu chọn chuyển khoản), rồi mới xóa giỏ để trang này không tự chuyển về giỏ hàng
+      navigate(`/order/${encodeURIComponent(order.order_code)}?phone=${encodeURIComponent(formData.phone.trim())}`, { replace: true });
       await clearCart();
-      navigate('/');
     } catch (error) {
       console.error(error);
+      // Mã hết lượt / khách đã dùng... trong lúc đang điền form: kiểm tra lại để hiện lý do ngay dưới ô mã
+      if (coupon && errorStatus(error) === 400) void applyCoupon(coupon.code, true);
     } finally {
       setLoading(false);
     }
@@ -70,8 +117,9 @@ const CheckoutPage: React.FC = () => {
     return null;
   }
 
-  const shippingFee = cart.total >= 5000000 ? 0 : 30000;
-  const totalAmount = cart.total + shippingFee;
+  const shippingFee = coupon ? coupon.shipping_fee : cart.total >= 5000000 ? 0 : 30000;
+  const discount = coupon ? coupon.discount : 0;
+  const totalAmount = coupon ? coupon.total_amount : cart.total + shippingFee;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -164,7 +212,7 @@ const CheckoutPage: React.FC = () => {
                 className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="cod">Thanh toán khi nhận hàng (COD)</option>
-                <option value="banking">Chuyển khoản ngân hàng</option>
+                <option value="banking">Chuyển khoản ngân hàng (quét mã VietQR)</option>
               </select>
             </div>
 
@@ -193,7 +241,8 @@ const CheckoutPage: React.FC = () => {
         </div>
 
         {/* Order Summary */}
-        <div className="bg-white rounded-lg shadow-md p-6 h-fit sticky top-24">
+        {/* Điện thoại: hiện đơn hàng + ô mã giảm giá trước form để khách thấy tổng tiền trước khi bấm Đặt hàng */}
+        <div className="bg-white rounded-lg shadow-md p-6 h-fit order-first lg:order-none lg:sticky lg:top-24">
           <h2 className="text-xl font-bold mb-4">Đơn hàng của bạn</h2>
           
           <div className="space-y-3 mb-4 max-h-96 overflow-y-auto">
@@ -207,11 +256,73 @@ const CheckoutPage: React.FC = () => {
             ))}
           </div>
 
+          <div className="border-t pt-4 pb-4">
+            <label htmlFor="coupon-code" className="block text-sm font-medium text-gray-700 mb-1">
+              Mã giảm giá
+            </label>
+            {coupon ? (
+              <div className="flex items-start justify-between gap-3 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-sm">
+                <div>
+                  <p className="font-mono font-semibold text-green-800">{coupon.code}</p>
+                  <p className="text-green-700">{coupon.description || coupon.summary}</p>
+                </div>
+                <button type="button" onClick={removeCoupon} className="shrink-0 text-sm font-medium text-gray-600 hover:text-red-600">
+                  Bỏ mã
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="flex gap-2">
+                  <input
+                    id="coupon-code"
+                    type="text"
+                    value={couponInput}
+                    onChange={(e) => {
+                      setCouponInput(e.target.value.toUpperCase());
+                      setCouponError('');
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        void applyCoupon(couponInput);
+                      }
+                    }}
+                    maxLength={30}
+                    autoComplete="off"
+                    placeholder="Nhập mã nếu có"
+                    aria-invalid={!!couponError}
+                    aria-describedby="coupon-error"
+                    className={`min-w-0 flex-1 px-3 py-2 border rounded-lg font-mono uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 ${couponError ? 'border-red-400' : ''}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void applyCoupon(couponInput)}
+                    disabled={checkingCoupon}
+                    className="shrink-0 px-4 py-2 rounded-lg border border-blue-600 text-blue-600 font-semibold hover:bg-blue-50 disabled:opacity-50"
+                  >
+                    {checkingCoupon ? 'Đang kiểm tra…' : 'Áp dụng'}
+                  </button>
+                </div>
+                {couponError && (
+                  <p id="coupon-error" role="alert" className="mt-1 text-sm text-red-600">
+                    {couponError}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+
           <div className="border-t pt-4 space-y-2">
             <div className="flex justify-between">
               <span>Tạm tính:</span>
               <span>{formatPrice(cart.total)}</span>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-green-700">
+                <span>Giảm giá ({coupon?.code}):</span>
+                <span>-{formatPrice(discount)}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span>Phí vận chuyển:</span>
               <span>{shippingFee === 0 ? 'Miễn phí' : formatPrice(shippingFee)}</span>

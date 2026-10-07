@@ -11,11 +11,21 @@ import CheckoutPage from './pages/CheckoutPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AccountPage from './pages/AccountPage';
+import PolicyPage from './pages/PolicyPage';
+import BuildPcPage from './pages/BuildPcPage';
+import OrderPage from './pages/OrderPage';
+import MyOrdersPage from './pages/MyOrdersPage';
+import MyOrderDetailPage from './pages/MyOrderDetailPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
+import ScrollToTop from './components/Common/ScrollToTop';
+import SupportChat from './components/Chat/SupportChat';
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AuthProvider>
         <CartProvider>
           {/* Layout bao bọc toàn bộ routes */}
@@ -26,8 +36,17 @@ function App() {
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />
               <Route path="/cart" element={<CartPage />} />
+              <Route path="/build-pc" element={<BuildPcPage />} />
+              <Route path="/order/:code" element={<OrderPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+              {/* Chính sách (link ở cuối footer) */}
+              <Route path="/privacy" element={<PolicyPage slug="privacy" />} />
+              <Route path="/terms" element={<PolicyPage slug="terms" />} />
+              <Route path="/return" element={<PolicyPage slug="return" />} />
               
               {/* Protected routes - yêu cầu đăng nhập */}
               <Route 
@@ -37,6 +56,22 @@ function App() {
                     <AccountPage />
                   </ProtectedRoute>
                 } 
+              />
+              <Route
+                path="/account/orders"
+                element={
+                  <ProtectedRoute>
+                    <MyOrdersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/account/orders/:code"
+                element={
+                  <ProtectedRoute>
+                    <MyOrderDetailPage />
+                  </ProtectedRoute>
+                }
               />
               <Route 
                 path="/checkout" 
@@ -51,6 +86,9 @@ function App() {
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Layout>
+
+          {/* Chat hỗ trợ trực tiếp với nhân viên (có trợ lý AI) trên mọi trang */}
+          <SupportChat />
           
           {/* Toast notifications */}
           <Toaster
@@ -90,7 +128,7 @@ function App() {
               },
               loading: {
                 style: {
-                  background: '#3b82f6',
+                  background: '#6366f1',
                   color: '#fff',
                 },
               },

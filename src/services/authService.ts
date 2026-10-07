@@ -4,6 +4,7 @@ import {
   ApiResponse, 
   User, 
   RegisterPayload,
+  RegisterOtpInfo,
   LoginPayload,
   UpdateMePayload,
   ChangePasswordPayload,
@@ -16,14 +17,25 @@ const STORAGE_KEYS = {
 } as const;
 
 export const authService = {
-  // Đăng ký
-  async register(payload: RegisterPayload): Promise<{ success: boolean; message?: string; data: { id: number } }> {
-    const response = await api.post<ApiResponse<{ id: number }>>('/auth/register', payload);
-    return {
-      success: response.data.success,
-      message: response.data.message,
-      data: response.data.data
-    };
+  // Đăng ký bước 1: gửi mã OTP tới email (tài khoản CHƯA được tạo). Gửi email có thể mất vài giây nên chờ lâu hơn.
+  async register(payload: RegisterPayload): Promise<RegisterOtpInfo> {
+    const response = await api.post<ApiResponse<RegisterOtpInfo>>('/auth/register', payload, { timeout: 30000 });
+    return response.data.data;
+  },
+
+  // Đăng ký bước 2: nhập đúng mã => server tạo tài khoản và trả về token (đăng nhập luôn)
+  async verifyRegistration(email: string, code: string): Promise<AuthResponse> {
+    const response = await api.post<ApiResponse<AuthResponse>>('/auth/register/verify', { email, code });
+    const data = response.data.data;
+    this.setToken(data.token);
+    this.setUser(data.user);
+    return data;
+  },
+
+  // Gửi lại mã OTP
+  async resendRegistrationOtp(email: string): Promise<RegisterOtpInfo> {
+    const response = await api.post<ApiResponse<RegisterOtpInfo>>('/auth/register/resend', { email }, { timeout: 30000 });
+    return response.data.data;
   },
 
   // Đăng nhập - Trả về AuthResponse trực tiếp (không qua data wrapper)
@@ -40,6 +52,18 @@ export const authService = {
       success: response.data.success,
       data: response.data.data  // data là AuthResponse { token, user }
     };
+  },
+
+  // Quên mật khẩu: server luôn trả cùng một thông báo (không tiết lộ email có tồn tại hay không)
+  async forgotPassword(email: string): Promise<string> {
+    const response = await api.post<ApiResponse<null>>('/auth/forgot-password', { email }, { timeout: 30000 });
+    return response.data.message || 'Nếu email tồn tại, hướng dẫn đặt lại mật khẩu đã được gửi.';
+  },
+
+  // Đặt lại mật khẩu bằng liên kết trong email
+  async resetPassword(token: string, newPassword: string): Promise<string> {
+    const response = await api.post<ApiResponse<null>>('/auth/reset-password', { token, new_password: newPassword });
+    return response.data.message || 'Đặt lại mật khẩu thành công';
   },
 
   // Lấy thông tin user hiện tại
@@ -68,6 +92,23 @@ export const authService = {
       success: response.data.success,
       data: response.data.data
     };
+  },
+
+  // Đổi email (khách hàng): gửi mã tới email mới -> nhập mã
+  async requestEmailChange(newEmail: string, currentPassword: string): Promise<RegisterOtpInfo> {
+    const response = await api.post<ApiResponse<RegisterOtpInfo>>('/users/me/email', { new_email: newEmail, current_password: currentPassword }, { timeout: 30000 });
+    return response.data.data;
+  },
+
+  async verifyEmailChange(newEmail: string, code: string): Promise<User> {
+    const response = await api.post<ApiResponse<User>>('/users/me/email/verify', { new_email: newEmail, code });
+    this.setUser(response.data.data);
+    return response.data.data;
+  },
+
+  async resendEmailChange(newEmail: string): Promise<RegisterOtpInfo> {
+    const response = await api.post<ApiResponse<RegisterOtpInfo>>('/users/me/email/resend', { new_email: newEmail }, { timeout: 30000 });
+    return response.data.data;
   },
 
   // Đổi mật khẩu

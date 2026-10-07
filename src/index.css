@@ -1,10 +1,13 @@
+@import './theme.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-gray-50;
+    /* Nền trang lấy từ biến --app-bg (đổi theo sáng/tối) — xem theme.css */
+    background-color: rgb(var(--app-bg));
   }
 }
 
@@ -28,4 +31,9 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+}
+
+/* Cửa hàng dùng nền sáng hơn một chút ở chế độ sáng */
+:root:not(.dark) {
+  --app-bg: 248 250 252;
 }

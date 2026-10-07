@@ -1,73 +1,82 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ShoppingCartIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { Product } from '../../types';
 import { formatPrice } from '../../utils/formatters';
 import { useCart } from '../../hooks/useCart';
-import { ShoppingCartIcon } from '@heroicons/react/24/outline';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import FadeImage from '../Common/FadeImage';
 
 interface ProductCardProps {
   product: Product;
 }
 
+/** Thẻ sản phẩm: cả thẻ là một liên kết (mở tab mới được), nút giỏ hàng có trạng thái đang thêm / đã thêm. */
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
-  const navigate = useNavigate();
+  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
+  const outOfStock = product.stock <= 0;
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault(); // không mở trang chi tiết khi bấm nút giỏ hàng
     e.stopPropagation();
-    addToCart(product.id);
+    if (adding || outOfStock) return;
+    setAdding(true);
+    await addToCart(product.id);
+    setAdding(false);
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 1500);
   };
 
   return (
-    <motion.div
-      whileHover={{ y: -5 }}
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
-      onClick={() => navigate(`/products/${product.id}`)}
+    <Link
+      to={`/products/${product.id}`}
+      className="group flex h-full flex-col overflow-hidden rounded-xl bg-white shadow-md transition duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
     >
-      <div className="relative h-48 bg-gray-200">
+      <div className="relative aspect-[4/3] bg-gray-100">
         {product.image_url ? (
-          <img
+          <FadeImage
             src={product.image_url}
             alt={product.name}
-            className="w-full h-full object-cover"
+            loading="lazy"
+            className="h-full w-full object-contain p-2 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            No Image
-          </div>
+          <div className="flex h-full w-full items-center justify-center text-sm text-gray-400">No Image</div>
         )}
-        {product.stock <= 0 && (
-          <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs">
-            Hết hàng
-          </div>
-        )}
+        {outOfStock && <div className="absolute right-2 top-2 rounded bg-red-500 px-2 py-1 text-xs text-white">Hết hàng</div>}
       </div>
-      
-      <div className="p-4">
-        <h3 className="font-semibold text-lg mb-2 line-clamp-2">{product.name}</h3>
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-        
-        <div className="flex justify-between items-center">
-          <div>
-            <span className="text-red-600 font-bold text-xl">{formatPrice(product.price)}</span>
-          </div>
-          
-          <motion.button
-            whileTap={{ scale: 0.95 }}
+
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
+        <h3 className="mb-1 line-clamp-2 text-sm font-semibold text-gray-900 sm:text-base">{product.name}</h3>
+        {product.description && <p className="mb-2 hidden text-sm text-gray-600 sm:line-clamp-2">{product.description}</p>}
+
+        <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+          <span className="text-base font-bold text-red-600 sm:text-xl">{formatPrice(product.price)}</span>
+          <button
+            type="button"
             onClick={handleAddToCart}
-            disabled={product.stock <= 0}
-            className={`p-2 rounded-full transition-colors ${
-              product.stock > 0
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            disabled={outOfStock || adding}
+            aria-label={outOfStock ? 'Hết hàng' : `Thêm ${product.name} vào giỏ hàng`}
+            className={`shrink-0 rounded-full p-2 transition active:scale-90 ${
+              outOfStock
+                ? 'cursor-not-allowed bg-gray-300 text-gray-500'
+                : added
+                  ? 'bg-green-600 text-white'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
-            <ShoppingCartIcon className="h-5 w-5" />
-          </motion.button>
+            {adding ? (
+              <span className="block h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            ) : added ? (
+              <CheckIcon className="h-5 w-5" />
+            ) : (
+              <ShoppingCartIcon className="h-5 w-5" />
+            )}
+          </button>
         </div>
       </div>
-    </motion.div>
+    </Link>
   );
 };
 

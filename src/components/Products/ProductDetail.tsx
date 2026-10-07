@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Product } from '../../types';
 import { formatPrice } from '../../utils/formatters';
 import { useCart } from '../../hooks/useCart';
-import { ShoppingCartIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { ShoppingCartIcon, HeartIcon, CheckIcon, MagnifyingGlassPlusIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import ImageLightbox from './ImageLightbox';
+import FadeImage from '../Common/FadeImage';
 
 interface ProductDetailProps {
   product: Product;
@@ -15,6 +17,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [isWishlist, setIsWishlist] = useState(false);
+  const [zoomOpen, setZoomOpen] = useState(false);
+  const closeZoom = useCallback(() => setZoomOpen(false), []);
+  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
 
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta;
@@ -23,9 +29,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
     }
   };
 
-  const handleAddToCart = () => {
-    addToCart(product.id, quantity);
+  // Chống bấm nhiều lần: trong lúc đang thêm thì khóa nút; xong thì nút báo "Đã thêm" 1,5 giây
+  const handleAddToCart = async () => {
+    if (adding || product.stock <= 0) return;
+    setAdding(true);
+    await addToCart(product.id, quantity);
+    setAdding(false);
+    setAdded(true);
     setQuantity(1);
+    window.setTimeout(() => setAdded(false), 1500);
   };
 
   const specsList = product.specs ? Object.entries(product.specs) : [];
@@ -35,13 +47,23 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
         {/* Product Image */}
         <div className="relative">
-          <div className="bg-gray-100 rounded-lg h-96 flex items-center justify-center">
+          <div className="bg-gray-100 rounded-lg h-80 sm:h-96 flex items-center justify-center overflow-hidden">
             {product.image_url ? (
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="max-h-full max-w-full object-contain"
-              />
+              <button
+                type="button"
+                onClick={() => setZoomOpen(true)}
+                aria-label="Phóng to ảnh sản phẩm"
+                className="group relative flex h-full w-full cursor-zoom-in items-center justify-center"
+              >
+                <FadeImage
+                  src={product.image_url}
+                  alt={product.name}
+                  className="max-h-full max-w-full object-contain group-hover:scale-105"
+                />
+                <span className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-1 rounded-full bg-black/60 px-3 py-1 text-xs text-white opacity-90 transition group-hover:opacity-100">
+                  <MagnifyingGlassPlusIcon className="h-4 w-4" /> Bấm để phóng to
+                </span>
+              </button>
             ) : (
               <div className="text-gray-400 text-center">
                 <svg className="w-32 h-32 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,15 +132,21 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
               <div className="flex items-center space-x-4">
                 <div className="flex items-center border rounded-lg">
                   <button
+                    type="button"
                     onClick={() => handleQuantityChange(-1)}
-                    className="px-4 py-2 hover:bg-gray-100 transition"
+                    disabled={quantity <= 1}
+                    aria-label="Giảm số lượng"
+                    className="px-4 py-2 hover:bg-gray-100 transition active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     -
                   </button>
-                  <span className="px-6 py-2 border-x">{quantity}</span>
+                  <span className="min-w-[3.5rem] px-4 py-2 border-x text-center tabular-nums" aria-live="polite">{quantity}</span>
                   <button
+                    type="button"
                     onClick={() => handleQuantityChange(1)}
-                    className="px-4 py-2 hover:bg-gray-100 transition"
+                    disabled={quantity >= product.stock}
+                    aria-label="Tăng số lượng"
+                    className="px-4 py-2 hover:bg-gray-100 transition active:scale-90 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     +
                   </button>
@@ -133,19 +161,29 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={handleAddToCart}
-              disabled={product.stock <= 0}
-              className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition ${
-                product.stock > 0
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              disabled={product.stock <= 0 || adding}
+              className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors duration-200 ${
+                product.stock <= 0
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : added
+                    ? 'bg-green-600 text-white'
+                    : 'bg-blue-600 text-white hover:bg-blue-700 disabled:cursor-wait disabled:opacity-80'
               }`}
             >
-              <ShoppingCartIcon className="h-5 w-5" />
-              Thêm vào giỏ hàng
+              {adding ? (
+                <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : added ? (
+                <CheckIcon className="h-5 w-5" />
+              ) : (
+                <ShoppingCartIcon className="h-5 w-5" />
+              )}
+              {product.stock <= 0 ? 'Hết hàng' : adding ? 'Đang thêm…' : added ? 'Đã thêm vào giỏ' : 'Thêm vào giỏ hàng'}
             </motion.button>
             
             <motion.button
               whileTap={{ scale: 0.95 }}
+              aria-label={isWishlist ? 'Bỏ yêu thích' : 'Yêu thích'}
+              aria-pressed={isWishlist}
               onClick={() => {
                 setIsWishlist(!isWishlist);
                 toast.success(isWishlist ? 'Đã xóa khỏi yêu thích' : 'Đã thêm vào yêu thích');
@@ -170,6 +208,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
           </div>
         </div>
       </div>
+      {zoomOpen && product.image_url && <ImageLightbox src={product.image_url} alt={product.name} onClose={closeZoom} />}
     </div>
   );
 };

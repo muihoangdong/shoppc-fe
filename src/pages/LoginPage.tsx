@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { LogoMark } from '../components/Common/Logo';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -38,6 +39,9 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-600 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
+          <Link to="/" aria-label="Về trang chủ Shoppc" className="inline-block mb-4">
+            <LogoMark className="h-16 w-16 rounded-[14px] drop-shadow-md" />
+          </Link>
           <h1 className="text-2xl font-bold text-gray-900">Đăng nhập</h1>
           <p className="text-gray-600 mt-2">
             Đăng nhập để lưu thông tin và tiếp tục thanh toán

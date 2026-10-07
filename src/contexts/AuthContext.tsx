@@ -8,6 +8,7 @@ type Props = {
   children: React.ReactNode;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components -- context/hook dùng chung, không ảnh hưởng khi chạy
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: Props) {
@@ -59,14 +60,17 @@ export function AuthProvider({ children }: Props) {
     }
   }, []);
 
-  const register = useCallback(async (payload: RegisterPayload) => {
-    const response = await authService.register(payload);
-    if (response.success) {
-      toast.success(response.message || 'Đăng ký thành công! Vui lòng đăng nhập');
-    } else {
-      toast.error(response.message || 'Đăng ký thất bại');
-    }
+  // Đăng ký bước 1: gửi mã OTP (lỗi đã được api.ts hiện thông báo)
+  const register = useCallback((payload: RegisterPayload) => authService.register(payload), []);
+
+  // Đăng ký bước 2: nhập đúng mã => tài khoản được tạo và đăng nhập luôn
+  const verifyRegistration = useCallback(async (email: string, code: string) => {
+    const data = await authService.verifyRegistration(email, code);
+    setUser(data.user);
+    toast.success('Xác nhận email thành công! Chào mừng bạn đến với Shoppc');
   }, []);
+
+  const resendRegistrationOtp = useCallback((email: string) => authService.resendRegistrationOtp(email), []);
 
   const value = useMemo<AuthContextType>(() => ({
     user,
@@ -74,9 +78,11 @@ export function AuthProvider({ children }: Props) {
     isLoading,
     login,
     register,
+    verifyRegistration,
+    resendRegistrationOtp,
     logout,
     refreshUser: fetchMe,
-  }), [fetchMe, isLoading, login, logout, register, user]);
+  }), [fetchMe, isLoading, login, logout, register, verifyRegistration, resendRegistrationOtp, user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

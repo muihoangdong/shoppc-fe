@@ -2,9 +2,22 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shoppc - Cửa hàng máy tính chính hãng</title>
+    <!-- Đặt giao diện sáng/tối TRƯỚC khi vẽ trang để không bị chớp trắng -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('shoppc_theme');
+          if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          if (t === 'dark') document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = t;
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="theme-color" content="#4f46e5" />
   </head>
   <body>
     <div id="root"></div>

@@ -3,7 +3,8 @@ import { productService } from '../services/productService';
 import { Product } from '../types';
 import ProductCard from '../components/Products/ProductCard';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
-import { motion } from 'framer-motion';
+import { PRODUCT_GRID } from '../utils/layout';
+// import { motion } from 'framer-motion';
 
 const HomePage = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -20,7 +21,7 @@ const HomePage = () => {
           productService.getProductsByType('component'),
         ]);
 
-        setFeaturedProducts(allProducts.slice(0, 6));
+        setFeaturedProducts(allProducts.slice(0, 8)); // 2 hàng × 4
         setPcProducts(pcList.slice(0, 4));
         setComponentProducts(componentList.slice(0, 4));
       } catch (error) {
@@ -37,7 +38,7 @@ const HomePage = () => {
 
   return (
     <div>
-      <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
+      {/* <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
         <div className="container mx-auto px-4 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -63,12 +64,12 @@ const HomePage = () => {
             Mua ngay
           </motion.button>
         </div>
-      </section>
+      </section> */}
 
       <section className="py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8 text-center">Sản phẩm nổi bật</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={PRODUCT_GRID}>
             {featuredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -79,7 +80,7 @@ const HomePage = () => {
       <section className="py-12 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8 text-center">PC Gaming & Văn phòng</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className={PRODUCT_GRID}>
             {pcProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -90,7 +91,7 @@ const HomePage = () => {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8 text-center">Linh kiện máy tính</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className={PRODUCT_GRID}>
             {componentProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

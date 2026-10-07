@@ -74,7 +74,7 @@ export interface User {
   email: string;
   full_name: string;
   avatar?: string;
-  role: 'admin' | 'staff';
+  role: 'admin' | 'staff' | 'customer';
   status: 'active' | 'inactive';
   last_login?: string;
   created_at: string;
@@ -91,6 +91,19 @@ export interface RegisterPayload {
   password: string;
   email: string;
   full_name: string;
+}
+
+/** Kết quả bước 1 của đăng ký: đã gửi mã OTP tới email (tài khoản CHƯA được tạo) */
+export interface RegisterOtpInfo {
+  otp_required: true;
+  email: string;
+  masked_email: string;
+  /** Số giây còn lại trước khi mã hết hạn */
+  expires_in: number;
+  /** Số giây phải chờ trước khi được gửi lại mã */
+  resend_in: number;
+  /** Chỉ có khi backend chạy thử và chưa cấu hình gửi email: mã OTP để hiện ngay trên trang */
+  dev_code?: string;
 }
 
 export interface UpdateMePayload {
@@ -114,7 +127,11 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (payload: LoginPayload) => Promise<void>;
-  register: (payload: RegisterPayload) => Promise<void>;
+  /** Bước 1: gửi mã OTP tới email */
+  register: (payload: RegisterPayload) => Promise<RegisterOtpInfo>;
+  /** Bước 2: nhập đúng mã => tạo tài khoản và đăng nhập luôn */
+  verifyRegistration: (email: string, code: string) => Promise<void>;
+  resendRegistrationOtp: (email: string) => Promise<RegisterOtpInfo>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -141,6 +158,8 @@ export interface Order {
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'completed' | 'cancelled';
   tracking_number?: string;
   admin_note?: string;
+  /** Lúc khách báo "Tôi đã chuyển khoản" (null khi chưa báo / cửa hàng báo chưa nhận được tiền) */
+  payment_claimed_at?: string | null;
   created_at: string;
   updated_at: string;
 }
