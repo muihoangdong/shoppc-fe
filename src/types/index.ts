@@ -27,8 +27,25 @@ export interface Product {
   category_type?: string;
   image_url?: string;
   specs: ProductSpecs;
+  /** Giá niêm yết trước giảm (lớn hơn price thì hiện gạch ngang + % giảm) */
+  original_price?: number | string | null;
+  /** Mô hình 3D / AR (null = sản phẩm chưa có mô hình, chỉ hiện ảnh) */
+  model_3d?: Model3dConfig | null;
+  part_type?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/** Mô hình 3D của sản phẩm, hiển thị bằng Google <model-viewer> */
+export interface Model3dConfig {
+  /** File GLB/GLTF — có link này sản phẩm mới hiện nút xem 3D */
+  glb_url?: string;
+  /** File USDZ cho AR trên iPhone/iPad (trống: model-viewer tự chuyển từ GLB) */
+  usdz_url?: string;
+  /** Ảnh hiện trong lúc tải mô hình (trống: ảnh sản phẩm) */
+  poster_url?: string;
+  /** false = tạm ẩn 3D */
+  enabled?: boolean;
 }
 
 // ==================== CART ====================

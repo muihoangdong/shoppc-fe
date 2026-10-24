@@ -3,7 +3,7 @@ import useSupportChat from '../../hooks/useSupportChat';
 import { supportChat, ChatMessage } from '../../services/supportChat';
 import { tokenStorage } from '../../services/tokenStorage';
 
-const QUICK = ['Tư vấn chọn laptop', 'Kiểm tra đơn hàng của tôi', 'Chính sách bảo hành'];
+const QUICK = ['Tư vấn cấu hình 20-30 triệu chơi game', 'Kiểm tra tương thích CPU & Main', 'Kiểm tra đơn hàng của tôi', 'Chính sách bảo hành'];
 
 const timeOf = (iso: string) => {
   const d = new Date(iso);
@@ -117,25 +117,28 @@ const SupportChat: React.FC = () => {
   return (
     <>
       {open && (
-        <div role="dialog" aria-label="Chat hỗ trợ" className="fixed bottom-24 right-4 z-50 flex h-[32rem] max-h-[calc(100vh-7rem)] w-[23rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border bg-white shadow-2xl sm:right-6">
-          <div className="flex items-center justify-between bg-blue-600 px-4 py-3 text-white">
-            <div className="min-w-0">
-              <p className="font-semibold leading-tight">Shoppc hỗ trợ</p>
-              <p className="flex items-center gap-1.5 truncate text-xs text-blue-100" data-testid="chat-presence">
-                <span className={`h-2 w-2 shrink-0 rounded-full ${chat.staffOnline > 0 ? 'bg-green-300' : 'bg-blue-300'}`} />
+        <div role="dialog" aria-label="Chat hỗ trợ" className="fixed bottom-24 right-4 z-50 flex h-[34rem] max-h-[calc(100vh-7rem)] w-[24rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:right-6">
+          <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-blue-700 to-blue-500 px-4 py-3 text-white">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
+              <ChatIcon />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold leading-tight">ShopPC AI Assistant</p>
+              <p className="flex items-center gap-1.5 truncate font-mono text-[11px] text-blue-100" data-testid="chat-presence">
+                <span className={`h-2 w-2 shrink-0 rounded-full ${chat.staffOnline > 0 ? 'bg-green-300' : 'bg-blue-200'}`} />
                 {presence}
               </p>
             </div>
-            <button onClick={() => setOpen(false)} aria-label="Đóng chat" className="rounded-lg p-1.5 hover:bg-blue-500">
+            <button onClick={() => setOpen(false)} aria-label="Đóng chat" className="rounded-lg p-1.5 hover:bg-white/15">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5" aria-hidden="true">
                 <path strokeLinecap="round" d="M6 6l12 12M18 6 6 18" />
               </svg>
             </button>
           </div>
 
-          <div ref={listRef} className="flex flex-1 flex-col gap-2 overflow-y-auto bg-gray-50 p-3" data-testid="chat-list" aria-live="polite">
+          <div ref={listRef} className="flex flex-1 flex-col gap-2 overflow-y-auto bg-slate-50 p-3" data-testid="chat-list" aria-live="polite">
             <div className="max-w-[85%] self-start rounded-2xl rounded-bl-sm border bg-white px-3 py-2 text-sm text-gray-800">
-              Xin chào! Bạn cần tư vấn sản phẩm hay hỗ trợ đơn hàng? Cứ nhắn cho chúng mình nhé.
+              Chào bạn! Mình là ShopPC AI Assistant. Bạn đang cần tư vấn build cấu hình PC chơi game / đồ họa, kiểm tra độ tương thích linh kiện hay hỗ trợ đơn hàng?
             </div>
             {chat.status === 'starting' && <p className="text-center text-xs text-gray-400">Đang kết nối…</p>}
             {chat.status === 'error' && (
@@ -150,7 +153,7 @@ const SupportChat: React.FC = () => {
             {chat.messages.length === 0 && chat.status === 'ready' && (
               <div className="flex flex-wrap gap-2 pt-1">
                 {QUICK.map((q) => (
-                  <button key={q} onClick={() => void send(q)} className="rounded-full border border-blue-200 bg-white px-3 py-1 text-xs text-blue-700 hover:bg-blue-50">
+                  <button key={q} onClick={() => void send(q)} className="rounded-md border border-blue-200 bg-white px-2.5 py-1 font-mono text-[11px] text-blue-700 hover:bg-blue-50">
                     {q}
                   </button>
                 ))}
@@ -193,7 +196,7 @@ const SupportChat: React.FC = () => {
                 rows={1}
                 maxLength={2000}
                 disabled={chat.status === 'error'}
-                placeholder="Nhập tin nhắn…"
+                placeholder="Nhập câu hỏi hoặc yêu cầu tư vấn cấu hình…"
                 aria-label="Nhập tin nhắn"
                 className="max-h-28 min-h-[2.5rem] flex-1 resize-none rounded-xl border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
               />
@@ -208,7 +211,7 @@ const SupportChat: React.FC = () => {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? 'Đóng chat hỗ trợ' : 'Mở chat hỗ trợ'}
-        className="fixed bottom-6 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg transition hover:bg-blue-700 sm:right-6"
+        className="fixed bottom-6 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-lg shadow-blue-600/30 transition hover:scale-105 sm:right-6"
       >
         <ChatIcon />
         {!open && chat.unread > 0 && (

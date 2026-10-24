@@ -25,6 +25,10 @@ export default {
         app: 'rgb(var(--app-bg) / <alpha-value>)',
         sidebar: 'rgb(var(--sidebar) / <alpha-value>)',
       },
+      fontFamily: {
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
       animation: {
         'slide-in': 'slideIn 0.3s ease-out',
         'fade-in': 'fadeIn 0.3s ease-in',
