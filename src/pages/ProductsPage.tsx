@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   Squares2X2Icon,
@@ -36,11 +36,29 @@ type SortKey = keyof typeof SORTS;
 
 const TYPE_TITLE: Record<string, string> = { pc: 'Máy Tính Nguyên Bộ', component: 'Linh Kiện Máy Tính', peripheral: 'Phụ Kiện & Gaming Gear' };
 
+// Lần tải gần nhất: bấm Quay lại từ trang chi tiết thì danh sách hiện ngay (không qua vòng xoay) để cuộn về đúng chỗ cũ, rồi cập nhật ngầm
+let lastLoad: { search: string | null; products: Product[]; categories: Category[] } | null = null;
+
+// Trang / bộ lọc / sắp xếp lưu theo từng mục lịch sử trình duyệt (location.key): Quay lại thì về đúng trang đang xem
+type SavedView = { filter: FilterState; sort: SortKey; page: number };
+const viewKey = (key: string) => `shoppc_products_state:${key}`;
+const readView = (key: string): SavedView | null => {
+  try {
+    const raw = sessionStorage.getItem(viewKey(key));
+    return raw ? (JSON.parse(raw) as SavedView) : null;
+  } catch {
+    return null;
+  }
+};
+
 const ProductsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const [saved] = useState(() => readView(location.key));
+  const cached = lastLoad && lastLoad.search === searchParams.get('search') ? lastLoad : null;
+  const [products, setProducts] = useState<Product[]>(cached?.products ?? []);
+  const [categories, setCategories] = useState<Category[]>(cached?.categories ?? []);
+  const [loading, setLoading] = useState(!cached);
   const [refreshing, setRefreshing] = useState(false);
   const [syncedAt, setSyncedAt] = useState<Date | null>(null);
   const latest = useRef(0);
@@ -49,16 +67,44 @@ const ProductsPage: React.FC = () => {
   // ?category=<id> (từ "Xem thêm" ở mục Sản phẩm tương tự) chọn sẵn danh mục
   const categoryParam = Number(searchParams.get('category')) || null;
 
-  const [filter, setFilter] = useState<FilterState>(() => ({ ...EMPTY_FILTER, type: typeParam, categories: categoryParam ? [categoryParam] : [] }));
-  const [sort, setSort] = useState<SortKey>('popular');
+  const [filter, setFilterState] = useState<FilterState>(
+    () => saved?.filter ?? { ...EMPTY_FILTER, type: typeParam, categories: categoryParam ? [categoryParam] : [] }
+  );
+  const [sort, setSortState] = useState<SortKey>(saved?.sort ?? 'popular');
   const [view, setView] = useLocalStorage<'grid' | 'list'>('shoppc_products_view', 'grid');
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(saved?.page ?? 1);
   const [filtersOpen, setFiltersOpen] = useState(false); // điện thoại: ngăn kéo bộ lọc
 
-  // Đổi link trên thanh menu (?type=, ?category=) thì bộ lọc đổi theo
+  // Đổi bộ lọc / sắp xếp thì về trang 1 (làm ngay khi đổi, không dùng effect để không xóa trang đã khôi phục khi Quay lại)
+  const setFilter = (next: FilterState) => {
+    setFilterState(next);
+    setPage(1);
+  };
+  const setSort = (next: SortKey) => {
+    setSortState(next);
+    setPage(1);
+  };
+
+  // Đổi link trên thanh menu (?type=, ?category=) hoặc từ khóa thì bộ lọc đổi theo, về trang 1.
+  // So với giá trị trước (thay vì bỏ qua lần chạy đầu) để StrictMode chạy effect 2 lần cũng không xóa trạng thái đã khôi phục.
+  const prevParams = useRef({ typeParam, categoryParam, searchParam });
   useEffect(() => {
-    setFilter((f) => ({ ...f, type: typeParam, categories: categoryParam ? [categoryParam] : [] }));
-  }, [typeParam, categoryParam]);
+    const prev = prevParams.current;
+    if (prev.typeParam === typeParam && prev.categoryParam === categoryParam && prev.searchParam === searchParam) return;
+    prevParams.current = { typeParam, categoryParam, searchParam };
+    if (prev.typeParam !== typeParam || prev.categoryParam !== categoryParam) {
+      setFilterState((f) => ({ ...f, type: typeParam, categories: categoryParam ? [categoryParam] : [] }));
+    }
+    setPage(1);
+  }, [typeParam, categoryParam, searchParam]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(viewKey(location.key), JSON.stringify({ filter, sort, page }));
+    } catch {
+      /* chế độ ẩn danh / hết dung lượng: bỏ qua, chỉ mất tính năng nhớ trang */
+    }
+  }, [location.key, filter, sort, page]);
 
   // Tải toàn bộ sản phẩm (theo từ khóa tìm kiếm) một lần; lọc/sắp xếp/phân trang làm ngay trên trình duyệt
   useEffect(() => {
@@ -73,6 +119,7 @@ const ProductsPage: React.FC = () => {
         if (ticket !== latest.current) return;
         setCategories(allCategories);
         setProducts(productList);
+        lastLoad = { search: searchParam, products: productList, categories: allCategories };
         setSyncedAt(new Date());
         // "Báo khi có hàng": sản phẩm đang theo dõi đã có hàng lại
         for (const id of restockWatch.takeRestocked(productList)) {
@@ -90,8 +137,6 @@ const ProductsPage: React.FC = () => {
     };
     fetchData();
   }, [searchParam]);
-
-  useEffect(() => setPage(1), [filter, sort, searchParam]);
 
   // Danh mục con thuộc danh mục cha nào (chọn cha thì gồm cả con)
   const categoryIds = useMemo(() => {
@@ -145,6 +190,10 @@ const ProductsPage: React.FC = () => {
   }, [byType]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  // Trang đã nhớ vượt quá số trang (sản phẩm bị ẩn/xóa sau lần cập nhật) thì lùi về trang cuối
+  useEffect(() => {
+    if (!loading && page > totalPages) setPage(totalPages);
+  }, [loading, page, totalPages]);
   const current = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const goPage = (p: number) => {
     setPage(Math.min(Math.max(1, p), totalPages));
