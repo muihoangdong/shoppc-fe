@@ -8,8 +8,12 @@
   body {
     /* Nền trang lấy từ biến --app-bg (đổi theo sáng/tối) — xem theme.css */
     background-color: rgb(var(--app-bg));
-    font-feature-settings: 'cv11', 'ss01';
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+  }
+  /* Nút, ô nhập, menu chọn dùng cùng font với chữ thường */
+  button, input, select, textarea, optgroup {
+    font-family: inherit;
   }
   h1, h2, h3, h4 {
     letter-spacing: -0.02em;
@@ -28,16 +32,16 @@
   }
   /* Nhãn nhỏ kiểu kỹ thuật: chữ mono in hoa giãn chữ */
   .frost-label {
-    @apply font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-slate-500;
+    @apply text-[11px] font-medium uppercase tracking-wide text-slate-500;
   }
   .frost-chip {
-    @apply inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider;
+    @apply inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider;
   }
   .frost-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 font-mono text-xs font-semibold tracking-wide text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold tracking-wide text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
   }
   .frost-btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 font-mono text-xs font-semibold tracking-wide text-slate-700 transition hover:border-blue-300 hover:text-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold tracking-wide text-slate-700 transition hover:border-blue-300 hover:text-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
   }
   .frost-input {
     @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 transition focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/15;

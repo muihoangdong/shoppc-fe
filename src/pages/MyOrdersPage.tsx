@@ -17,7 +17,7 @@ function OrderCard({ order, onBuyAgain }: { order: MyOrder; onBuyAgain: (o: MyOr
     <li className="rounded-xl border border-gray-200 bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-4 py-3">
         <div className="text-sm">
-          <span className="font-mono font-semibold text-gray-900">{order.order_code}</span>
+          <span className="font-semibold text-gray-900">{order.order_code}</span>
           <span className="ml-2 text-gray-500">{formatDate(order.created_at)}</span>
         </div>
         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${STATUS_BADGE[order.status]}`}>{STATUS_LABEL[order.status]}</span>

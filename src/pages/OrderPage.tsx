@@ -134,7 +134,7 @@ export default function OrderPage() {
           <h1 className="mt-2 text-2xl font-bold text-gray-900">Đặt hàng thành công!</h1>
           <p className="mt-1 text-gray-600">
             Mã đơn hàng:{' '}
-            <button type="button" onClick={() => copy(info.order_code, 'mã đơn')} className="font-mono font-semibold text-blue-600 hover:underline">
+            <button type="button" onClick={() => copy(info.order_code, 'mã đơn')} className="font-semibold text-blue-600 hover:underline">
               {info.order_code}
             </button>
           </p>

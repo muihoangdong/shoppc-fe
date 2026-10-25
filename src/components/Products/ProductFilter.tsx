@@ -1,6 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { FunnelIcon, XMarkIcon, AdjustmentsHorizontalIcon, CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon, XMarkIcon, AdjustmentsHorizontalIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { Category } from '../../types';
 import { formatPrice } from '../../utils/formatters';
 import { EMPTY_FILTER, FilterState } from './filterState';
@@ -60,7 +59,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
             <FunnelIcon className="h-5 w-5 text-blue-600" /> Bộ lọc tuyển chọn
           </h2>
           {chips.length > 0 && (
-            <button type="button" onClick={() => onChange(EMPTY_FILTER)} className="font-mono text-[11px] text-blue-600 hover:underline">
+            <button type="button" onClick={() => onChange(EMPTY_FILTER)} className="text-[11px] text-blue-600 hover:underline">
               Đặt lại ({chips.length})
             </button>
           )}
@@ -72,7 +71,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
                 key={c.label}
                 type="button"
                 onClick={c.clear}
-                className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 font-mono text-[11px] text-blue-700 hover:bg-blue-100"
+                className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-[11px] text-blue-700 hover:bg-blue-100"
               >
                 {c.label} <XMarkIcon className="h-3 w-3" />
               </button>
@@ -101,7 +100,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
                     {active && <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />}
                     {t.label}
                   </span>
-                  <span className={`rounded px-1.5 font-mono text-[10px] ${active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>{count}</span>
+                  <span className={`rounded px-1.5 text-[10px] ${active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>{count}</span>
                 </button>
               </li>
             );
@@ -129,7 +128,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
                         {c.name}
                       </span>
                     </span>
-                    <span className="font-mono text-[10px] text-slate-400">{categoryCounts[c.id] || 0}</span>
+                    <span className="text-[10px] text-slate-400">{categoryCounts[c.id] || 0}</span>
                   </label>
                 </li>
               );
@@ -139,7 +138,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
       )}
 
       {brands.length > 0 && (
-        <Section title="Thương hiệu" action={filter.brands.length ? <span className="font-mono text-[10px] text-blue-600">Đã chọn {filter.brands.length}</span> : undefined}>
+        <Section title="Thương hiệu" action={filter.brands.length ? <span className="text-[10px] text-blue-600">Đã chọn {filter.brands.length}</span> : undefined}>
           <div className="flex flex-wrap gap-1.5">
             {brands.map((b) => {
               const active = filter.brands.includes(b.name);
@@ -149,7 +148,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
                   type="button"
                   aria-pressed={active}
                   onClick={() => set({ brands: toggle(filter.brands, b.name) })}
-                  className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 font-mono text-[11px] transition ${
+                  className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[11px] transition ${
                     active ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'
                   }`}
                 >
@@ -177,7 +176,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
           />
           <div className="mt-3 grid grid-cols-2 gap-2">
             <label className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-center">
-              <span className="block font-mono text-[10px] text-slate-500">Tối thiểu</span>
+              <span className="block text-[10px] text-slate-500">Tối thiểu</span>
               <input
                 type="number"
                 min={0}
@@ -186,11 +185,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
                 placeholder={String(priceBounds.min)}
                 value={filter.minPrice ?? ''}
                 onChange={(e) => set({ minPrice: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) })}
-                className="w-full bg-transparent text-center font-mono text-xs text-slate-800 outline-none"
+                className="w-full bg-transparent text-center text-xs text-slate-800 outline-none"
               />
             </label>
             <label className="rounded-lg border border-blue-200 bg-blue-50 px-2 py-1.5 text-center">
-              <span className="block font-mono text-[10px] text-blue-700">Tối đa</span>
+              <span className="block text-[10px] text-blue-700">Tối đa</span>
               <input
                 type="number"
                 min={0}
@@ -199,11 +198,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
                 placeholder={String(priceBounds.max)}
                 value={filter.maxPrice ?? ''}
                 onChange={(e) => set({ maxPrice: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) })}
-                className="w-full bg-transparent text-center font-mono text-xs font-semibold text-blue-700 outline-none"
+                className="w-full bg-transparent text-center text-xs font-semibold text-blue-700 outline-none"
               />
             </label>
           </div>
-          <p className="mt-2 text-center font-mono text-[10px] text-slate-400">
+          <p className="mt-2 text-center text-[10px] text-slate-400">
             {formatPrice(filter.minPrice ?? priceBounds.min)} – {formatPrice(maxValue)}
           </p>
           <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-slate-700">
@@ -218,18 +217,6 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
         </Section>
       )}
 
-      {/* Ưu đãi Build PC */}
-      <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500 p-5 text-white shadow-lg">
-        <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full border-[14px] border-white/10" />
-        <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider">
-          <SparklesIcon className="h-3 w-3" /> SHOPPC BUILD LAB
-        </span>
-        <h3 className="mt-3 text-lg font-bold leading-snug">Tự xây cấu hình PC, kiểm tra tương thích tức thì</h3>
-        <p className="mt-2 text-sm text-white/80">Chọn CPU, mainboard, RAM, VGA… hệ thống tự cảnh báo linh kiện không hợp và gợi ý cấu hình theo ngân sách.</p>
-        <Link to="/build-pc" className="mt-4 inline-flex rounded-lg bg-white px-3 py-1.5 font-mono text-xs font-semibold text-blue-700 hover:bg-blue-50">
-          Xây dựng PC ngay →
-        </Link>
-      </section>
     </div>
   );
 };

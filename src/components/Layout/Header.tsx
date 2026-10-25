@@ -43,7 +43,7 @@ const crumbsFor = (pathname: string, search: string): { to?: string; label: stri
   const map: Record<string, string> = {
     '/cart': 'Giỏ hàng',
     '/checkout': 'Thanh toán',
-    '/build-pc': 'Xây dựng PC',
+    '/build-pc': 'Cấu hình PC',
     '/account': 'Tài khoản',
     '/account/orders': 'Đơn hàng của tôi',
     '/login': 'Đăng nhập',
@@ -150,7 +150,7 @@ const Header: React.FC = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="frost-input !rounded-lg !py-2 pl-9 pr-14"
               />
-              <kbd className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-500 lg:block">
+              <kbd className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] text-slate-500 lg:block">
                 {isMac ? '⌘K' : 'Ctrl K'}
               </kbd>
             </label>
@@ -173,12 +173,12 @@ const Header: React.FC = () => {
             <NavLink
               to="/build-pc"
               className={({ isActive }) =>
-                `hidden items-center gap-1.5 rounded-lg px-3 py-2 font-mono text-xs font-semibold tracking-wide text-white shadow-sm transition sm:inline-flex ${
+                `hidden items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold tracking-wide text-white shadow-sm transition sm:inline-flex ${
                   isActive ? 'bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'
                 }`
               }
             >
-              <CpuChipIcon className="h-4 w-4" /> Xây Dựng PC
+              <CpuChipIcon className="h-4 w-4" /> Cấu hình PC
             </NavLink>
 
             <ThemeToggle />
@@ -262,7 +262,7 @@ const Header: React.FC = () => {
 
         {/* Đường dẫn + thông tin cửa hàng */}
         <div className="border-t border-slate-200 bg-slate-50/80">
-          <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-1.5 font-mono text-[11px] text-slate-500">
+          <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-1.5 text-[11px] text-slate-500">
             <nav aria-label="Đường dẫn" className="flex min-w-0 items-center gap-1.5 truncate">
               <Link to="/" className="flex items-center gap-1 hover:text-blue-600">
                 <HomeIcon className="h-3.5 w-3.5" /> Trang chủ
@@ -322,7 +322,7 @@ const Header: React.FC = () => {
                 </Link>
               ))}
               <Link to="/build-pc" className="frost-btn mx-1 mt-2">
-                <CpuChipIcon className="h-4 w-4" /> Xây Dựng PC
+                <CpuChipIcon className="h-4 w-4" /> Cấu hình PC
               </Link>
 
               <p className="frost-label px-3 pb-1 pt-5">Tài khoản</p>

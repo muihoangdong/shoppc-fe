@@ -128,7 +128,7 @@ export default function MyOrderDetailPage() {
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Đơn <span className="font-mono">{order.order_code}</span></h1>
+          <h1 className="text-2xl font-bold text-gray-900">Đơn <span>{order.order_code}</span></h1>
           <p className="text-sm text-gray-500">Đặt lúc {formatDate(order.created_at)}</p>
         </div>
         <span className={`rounded-full px-3 py-1 text-sm font-semibold ${STATUS_BADGE[order.status]}`}>{STATUS_LABEL[order.status]}</span>

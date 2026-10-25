@@ -145,7 +145,7 @@ const Product3DViewer: React.FC<Props> = ({ product, onClose, preferAr = false }
   };
 
   const cm = (m: number) => `${(m * 100).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} cm`;
-  const dimLabel = 'pointer-events-none whitespace-nowrap rounded-md bg-blue-600 px-2 py-0.5 font-mono text-[11px] font-semibold text-white shadow';
+  const dimLabel = 'pointer-events-none whitespace-nowrap rounded-md bg-blue-600 px-2 py-0.5 text-[11px] font-semibold text-white shadow';
 
   return createPortal(
     <div
@@ -289,7 +289,7 @@ const Product3DViewer: React.FC<Props> = ({ product, onClose, preferAr = false }
                 ).map(([k, v]) => (
                   <div key={k} className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-2">
                     <dt className="text-[11px] text-slate-500">{k}</dt>
-                    <dd className="font-mono text-sm font-semibold text-slate-900">{cm(v)}</dd>
+                    <dd className="text-sm font-semibold text-slate-900">{cm(v)}</dd>
                   </div>
                 ))}
               </dl>

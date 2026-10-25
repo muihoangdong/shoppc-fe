@@ -12,7 +12,7 @@ export default function DevOtpNotice({ code, onUse }: { code?: string; onUse: (c
         <KeyIcon className="h-5 w-5 shrink-0" /> Mã xác nhận của bạn
       </p>
       <div className="mt-2 flex items-center gap-3">
-        <span className="rounded-lg bg-white px-3 py-1.5 font-mono text-xl font-bold tracking-[0.3em] text-blue-900 ring-1 ring-blue-200">{code}</span>
+        <span className="rounded-lg bg-white px-3 py-1.5 text-xl font-bold tracking-[0.3em] text-blue-900 ring-1 ring-blue-200">{code}</span>
         <button type="button" onClick={() => onUse(code)} className="rounded-lg bg-blue-600 px-3 py-1.5 font-semibold text-white hover:bg-blue-700">
           Điền mã
         </button>

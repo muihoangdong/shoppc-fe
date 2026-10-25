@@ -175,7 +175,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
               <Thumb active={slide === '3d'} onClick={() => setSlide('3d')} label="Xem 3D">
                 <span className="flex flex-col items-center leading-none text-blue-600">
                   <CubeIcon className="h-6 w-6" />
-                  <span className="mt-1 font-mono text-[10px] font-bold">3D</span>
+                  <span className="mt-1 text-[10px] font-bold">3D</span>
                 </span>
               </Thumb>
             )}
@@ -198,7 +198,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <span className="frost-chip border-blue-200 bg-blue-50 text-blue-700">{product.category_name || 'Sản phẩm'}</span>
             {brand && <span className="frost-chip border-slate-200 bg-slate-50 text-slate-600">Hãng: {brand}</span>}
-            <span className="font-mono text-[11px] text-slate-400">SKU #{String(product.id).padStart(5, '0')}</span>
+            <span className="text-[11px] text-slate-400">SKU #{String(product.id).padStart(5, '0')}</span>
           </div>
           <h1 className="mb-4 text-2xl font-bold text-slate-900 sm:text-3xl">{product.name}</h1>
 
@@ -207,7 +207,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
             {discount && (
               <>
                 <span className="pb-1 text-base text-slate-400 line-through">{formatPrice(discount.original)}</span>
-                <span className="mb-1 rounded-md bg-red-100 px-2 py-0.5 font-mono text-xs font-bold text-red-600">Tiết kiệm {formatPrice(discount.original - Number(product.price))}</span>
+                <span className="mb-1 rounded-md bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600">Tiết kiệm {formatPrice(discount.original - Number(product.price))}</span>
               </>
             )}
           </div>
@@ -227,7 +227,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                   <tbody>
                     {specsList.map(([key, value], i) => (
                       <tr key={key} className={i % 2 ? 'bg-white' : 'bg-slate-50'}>
-                        <td className="w-2/5 px-4 py-2.5 font-mono text-xs uppercase tracking-wide text-slate-500">{key.replace(/_/g, ' ')}</td>
+                        <td className="w-2/5 px-4 py-2.5 text-xs uppercase tracking-wide text-slate-500">{key.replace(/_/g, ' ')}</td>
                         <td className="px-4 py-2.5 font-medium text-slate-800">{String(value)}</td>
                       </tr>
                     ))}

@@ -124,7 +124,7 @@ const SupportChat: React.FC = () => {
             </span>
             <div className="min-w-0 flex-1">
               <p className="font-semibold leading-tight">ShopPC AI Assistant</p>
-              <p className="flex items-center gap-1.5 truncate font-mono text-[11px] text-blue-100" data-testid="chat-presence">
+              <p className="flex items-center gap-1.5 truncate text-[11px] text-blue-100" data-testid="chat-presence">
                 <span className={`h-2 w-2 shrink-0 rounded-full ${chat.staffOnline > 0 ? 'bg-green-300' : 'bg-blue-200'}`} />
                 {presence}
               </p>
@@ -153,7 +153,7 @@ const SupportChat: React.FC = () => {
             {chat.messages.length === 0 && chat.status === 'ready' && (
               <div className="flex flex-wrap gap-2 pt-1">
                 {QUICK.map((q) => (
-                  <button key={q} onClick={() => void send(q)} className="rounded-md border border-blue-200 bg-white px-2.5 py-1 font-mono text-[11px] text-blue-700 hover:bg-blue-50">
+                  <button key={q} onClick={() => void send(q)} className="rounded-md border border-blue-200 bg-white px-2.5 py-1 text-[11px] text-blue-700 hover:bg-blue-50">
                     {q}
                   </button>
                 ))}

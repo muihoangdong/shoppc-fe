@@ -99,7 +99,7 @@ export default function BuildPcPage() {
   const [adding, setAdding] = useState(false);
 
   useEffect(() => {
-    document.title = 'Build PC - Tự chọn cấu hình - Shoppc';
+    document.title = 'Cấu hình PC - Tự chọn linh kiện - Shoppc';
     builderService.config().then(setConfig).catch(() => setConfigError(true));
   }, []);
 
@@ -205,7 +205,7 @@ export default function BuildPcPage() {
   if (configError) {
     return (
       <div className="container mx-auto px-4 py-16 text-center text-gray-600">
-        Không tải được trang Build PC. Vui lòng thử lại sau.
+        Không tải được trang Cấu hình PC. Vui lòng thử lại sau.
       </div>
     );
   }
@@ -216,14 +216,7 @@ export default function BuildPcPage() {
 
   return (
     <div className="bg-gray-50 min-h-full">
-      <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-        <div className="container mx-auto px-4 py-8 md:py-10">
-          <h1 className="text-2xl md:text-4xl font-bold">Build PC – Tự chọn cấu hình</h1>
-          <p className="mt-2 text-white/85 max-w-2xl">
-            Chọn từng linh kiện, hệ thống tự kiểm tra lắp có vừa không (socket, RAM, kích thước, nguồn). Hoặc cho AI chọn giúp theo ngân sách.
-          </p>
-        </div>
-      </section>
+      <h1 className="sr-only">Cấu hình PC – Tự chọn linh kiện</h1>
 
       <div className="container mx-auto px-4 py-6">
         {/* AI chọn giúp */}

@@ -95,7 +95,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, view = 'grid' }) => 
         <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">Chưa có ảnh</div>
       )}
       {has3d(product) && (
-        <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-md border border-blue-200 bg-white/90 px-1.5 py-0.5 font-mono text-[10px] font-bold text-blue-700">
+        <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-md border border-blue-200 bg-white/90 px-1.5 py-0.5 text-[10px] font-bold text-blue-700">
           <CubeIcon className="h-3 w-3" /> 3D · AR
         </span>
       )}
@@ -110,14 +110,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, view = 'grid' }) => 
   );
 
   const meta = (
-    <div className="mb-1 flex items-center justify-between gap-2 font-mono text-[10px] uppercase tracking-wider">
+    <div className="mb-1 flex items-center justify-between gap-2 text-[10px] uppercase tracking-wider">
       <span className="truncate text-slate-500">{product.category_name || 'Sản phẩm'}</span>
       {brand && <span className="shrink-0 font-semibold text-blue-600">{brand}</span>}
     </div>
   );
 
   const specTable = specs.length > 0 && (
-    <dl className="mt-2 space-y-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 font-mono text-[11px]">
+    <dl className="mt-2 space-y-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-[11px]">
       {specs.map(([k, v]) => (
         <div key={k} className="flex gap-2">
           <dt className="w-20 shrink-0 truncate capitalize text-slate-500">{k}:</dt>
@@ -131,9 +131,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, view = 'grid' }) => 
     <div>
       <div className="flex items-center gap-2">
         <span className="text-lg font-bold text-blue-600 sm:text-xl">{formatPrice(priceOf(product))}</span>
-        {discount && <span className="rounded border border-red-200 bg-red-50 px-1 font-mono text-[10px] font-bold text-red-600">-{discount.percent}%</span>}
+        {discount && <span className="rounded border border-red-200 bg-red-50 px-1 text-[10px] font-bold text-red-600">-{discount.percent}%</span>}
       </div>
-      <p className="font-mono text-[11px] text-slate-400">
+      <p className="text-[11px] text-slate-400">
         {discount ? <span className="line-through">{formatPrice(discount.original)}</span> : outOfStock ? 'Giá niêm yết' : 'Giá cam kết tốt'}
       </p>
     </div>

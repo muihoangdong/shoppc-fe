@@ -38,7 +38,7 @@ const Logo: React.FC<LogoProps> = ({ variant = 'default', markOnly = false, comp
           SHOP<span className={variant === 'light' ? 'text-sky-300' : 'text-blue-600'}>PC</span>
         </span>
         {!compact && (
-          <span className={`mt-1 flex items-center gap-1 font-mono text-[9px] font-semibold tracking-[0.2em] ${variant === 'light' ? 'text-white/70' : 'text-blue-600'}`}>
+          <span className={`mt-1 flex items-center gap-1 text-[9px] font-semibold tracking-[0.2em] ${variant === 'light' ? 'text-white/70' : 'text-blue-600'}`}>
             STARFORGE FROST
             <span className="h-1 w-1 rounded-full bg-current" />
           </span>

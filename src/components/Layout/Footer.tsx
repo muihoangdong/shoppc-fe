@@ -16,7 +16,7 @@ const COLUMNS: { title: string; links: { to: string; label: string }[] }[] = [
   {
     title: 'Dịch vụ & Hỗ trợ',
     links: [
-      { to: '/build-pc', label: 'Công cụ Xây dựng PC' },
+      { to: '/build-pc', label: 'Công cụ Cấu hình PC' },
       { to: '/account/orders', label: 'Tra cứu đơn hàng' },
       { to: '/return', label: 'Chính sách đổi trả' },
       { to: '/account', label: 'Tài khoản của tôi' },
@@ -36,10 +36,6 @@ const Footer: React.FC = () => {
             <p className="text-sm leading-relaxed text-slate-500">
               Cửa hàng máy tính và linh kiện chính hãng. Tư vấn cấu hình, lắp ráp và bảo hành tận nơi với giá tốt nhất.
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="frost-chip border-slate-200 bg-slate-50 text-slate-600">100% Chính hãng</span>
-              <span className="frost-chip border-blue-200 bg-blue-50 text-blue-700">COD · VietQR</span>
-            </div>
           </div>
 
           {COLUMNS.map((col) => (
@@ -84,7 +80,7 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-6 font-mono text-[11px] text-slate-500 md:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-6 text-[11px] text-slate-500 md:flex-row">
           <p>© {currentYear} Shoppc Hardware Platform. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-5">
             <Link to="/terms" className="hover:text-blue-600">

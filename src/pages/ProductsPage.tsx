@@ -194,7 +194,7 @@ const ProductsPage: React.FC = () => {
                 type="button"
                 onClick={() => setView(v)}
                 aria-pressed={view === v}
-                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 font-mono text-xs transition ${
+                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs transition ${
                   view === v ? 'bg-blue-50 font-semibold text-blue-700' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -204,7 +204,7 @@ const ProductsPage: React.FC = () => {
           </div>
           <label className="relative">
             <span className="sr-only">Sắp xếp</span>
-            <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className="frost-input !w-auto cursor-pointer !py-2 pr-8 font-mono text-xs">
+            <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className="frost-input !w-auto cursor-pointer !py-2 pr-8 text-xs">
               {Object.entries(SORTS).map(([k, s]) => (
                 <option key={k} value={k}>
                   {s.label}
@@ -222,7 +222,7 @@ const ProductsPage: React.FC = () => {
         <aside className="hidden lg:block lg:w-72 lg:shrink-0">{filterPanel}</aside>
 
         <div className="min-w-0 flex-1">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-mono text-[11px] text-slate-500">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[11px] text-slate-500">
             <span className="flex items-center gap-2">
               <CheckBadgeIcon className="h-4 w-4 text-blue-600" />
               Hiển thị {filtered.length ? `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, filtered.length)}` : 0} / {filtered.length} sản phẩm
@@ -268,7 +268,7 @@ const ProductsPage: React.FC = () => {
                         type="button"
                         onClick={() => goPage(p)}
                         aria-current={p === page ? 'page' : undefined}
-                        className={`h-9 min-w-[2.25rem] rounded-lg border px-2 font-mono text-xs transition ${
+                        className={`h-9 min-w-[2.25rem] rounded-lg border px-2 text-xs transition ${
                           p === page ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                         }`}
                       >
