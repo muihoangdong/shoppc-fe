@@ -194,6 +194,8 @@ export default function MyOrderDetailPage() {
             )}
           </section>
           <div className="flex flex-col gap-2">
+            {['delivered', 'completed'].includes(order.status) && <Link to={`/account/returns?order=${encodeURIComponent(order.order_code)}`} className="frost-btn-ghost">Yêu cầu đổi trả</Link>}
+            <Link to="/account/warranty" className="frost-btn-ghost">Tra cứu bảo hành</Link>
             {['delivered', 'completed', 'cancelled'].includes(order.status) && (
               <button onClick={() => void buyAgain(order, refreshCart)} className="inline-flex items-center justify-center gap-1 rounded-lg border border-blue-600 px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50">
                 <ArrowPathIcon className="h-5 w-5" /> Mua lại

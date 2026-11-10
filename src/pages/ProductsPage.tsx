@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { customerService, SpecTemplate } from '../services/customerService';
+import { buildSpecFacets, matchesSpecFilters } from '../utils/specFilters';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import toast from 'react-hot-toast';
 import {
   Squares2X2Icon,
   ListBulletIcon,
@@ -21,7 +22,7 @@ import ProductFilter from '../components/Products/ProductFilter';
 import { EMPTY_FILTER, FilterState } from '../components/Products/filterState';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { getBrand, priceOf, restockWatch } from '../utils/productMeta';
+import { getBrand, priceOf } from '../utils/productMeta';
 
 const PAGE_SIZE = 12;
 
@@ -56,6 +57,8 @@ const ProductsPage: React.FC = () => {
   const location = useLocation();
   const [saved] = useState(() => readView(location.key));
   const cached = lastLoad && lastLoad.search === searchParams.get('search') ? lastLoad : null;
+  const [templates, setTemplates] = useState<SpecTemplate[]>([]);
+  const [specError, setSpecError] = useState(false);
   const [products, setProducts] = useState<Product[]>(cached?.products ?? []);
   const [categories, setCategories] = useState<Category[]>(cached?.categories ?? []);
   const [loading, setLoading] = useState(!cached);
@@ -77,7 +80,7 @@ const ProductsPage: React.FC = () => {
 
   // Đổi bộ lọc / sắp xếp thì về trang 1 (làm ngay khi đổi, không dùng effect để không xóa trang đã khôi phục khi Quay lại)
   const setFilter = (next: FilterState) => {
-    setFilterState(next);
+    setFilterState({ ...next, specs: next.type !== filter.type || next.categories.join(',') !== filter.categories.join(',') ? {} : next.specs });
     setPage(1);
   };
   const setSort = (next: SortKey) => {
@@ -93,7 +96,7 @@ const ProductsPage: React.FC = () => {
     if (prev.typeParam === typeParam && prev.categoryParam === categoryParam && prev.searchParam === searchParam) return;
     prevParams.current = { typeParam, categoryParam, searchParam };
     if (prev.typeParam !== typeParam || prev.categoryParam !== categoryParam) {
-      setFilterState((f) => ({ ...f, type: typeParam, categories: categoryParam ? [categoryParam] : [] }));
+      setFilterState((f) => ({ ...f, type: typeParam, categories: categoryParam ? [categoryParam] : [], specs: {} }));
     }
     setPage(1);
   }, [typeParam, categoryParam, searchParam]);
@@ -121,11 +124,6 @@ const ProductsPage: React.FC = () => {
         setProducts(productList);
         lastLoad = { search: searchParam, products: productList, categories: allCategories };
         setSyncedAt(new Date());
-        // "Báo khi có hàng": sản phẩm đang theo dõi đã có hàng lại
-        for (const id of restockWatch.takeRestocked(productList)) {
-          const p = productList.find((x) => x.id === id);
-          if (p) toast.success(`${p.name} đã có hàng trở lại!`, { duration: 6000 });
-        }
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -148,6 +146,13 @@ const ProductsPage: React.FC = () => {
 
   const byType = useMemo(() => products.filter((p) => !filter.type || p.category_type === filter.type), [products, filter.type]);
 
+  const loadSpecFields = useCallback(async () => {
+    try { setTemplates(await customerService.specFields()); setSpecError(false); }
+    catch { setSpecError(true); }
+  }, []);
+  useEffect(() => { void loadSpecFields(); }, [loadSpecFields]);
+  const specFacets = useMemo(() => buildSpecFacets(byType, templates, filter.categories.length === 1 ? filter.categories[0] : null), [byType, templates, filter.categories]);
+
   const filtered = useMemo(() => {
     const list = byType.filter((p) => {
       if (categoryIds && !categoryIds.has(p.category_id)) return false;
@@ -159,12 +164,13 @@ const ProductsPage: React.FC = () => {
       if (filter.minPrice !== null && price < filter.minPrice) return false;
       if (filter.maxPrice !== null && price > filter.maxPrice) return false;
       if (filter.inStock && p.stock <= 0) return false;
+      if (!matchesSpecFilters(p, filter.specs || {}, specFacets)) return false;
       return true;
     });
     const fn = SORTS[sort].fn;
     // "Phổ biến": còn hàng lên trước, giữ thứ tự mặc định của cửa hàng
     return fn ? [...list].sort(fn) : [...list].sort((a, b) => Number(b.stock > 0) - Number(a.stock > 0));
-  }, [byType, categoryIds, filter, sort]);
+  }, [byType, categoryIds, filter, sort, specFacets]);
 
   const typeCounts = useMemo(() => {
     const out: Record<string, number> = {};
@@ -212,6 +218,9 @@ const ProductsPage: React.FC = () => {
       categoryCounts={categoryCounts}
       brands={brands}
       priceBounds={priceBounds}
+      specFacets={specFacets}
+      specError={specError}
+      onRetrySpecs={() => void loadSpecFields()}
     />
   );
 

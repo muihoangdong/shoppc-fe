@@ -1,3 +1,4 @@
+import { CustomerLinks } from './CustomerAccountPage';
 import { useAuth } from '../hooks/useAuth';
 import { formatDate } from '../utils/formatters';
 import { PencilIcon, KeyIcon, EnvelopeIcon, ClipboardDocumentListIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
@@ -155,6 +156,7 @@ export default function AccountPage() {
         <ChevronRightIcon className="h-5 w-5 shrink-0" />
       </Link>
 
+      <CustomerLinks />
       {/* Edit Profile Form */}
       {isEditing && (
         <div className="space-y-4 mb-6">

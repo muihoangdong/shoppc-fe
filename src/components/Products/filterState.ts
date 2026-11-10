@@ -6,6 +6,7 @@ export interface FilterState {
   minPrice: number | null;
   maxPrice: number | null;
   inStock: boolean;
+  specs?: Record<string, import('../../utils/specFilters').SpecSelection>;
 }
 
-export const EMPTY_FILTER: FilterState = { type: null, categories: [], brands: [], minPrice: null, maxPrice: null, inStock: false };
+export const EMPTY_FILTER: FilterState = { type: null, categories: [], brands: [], minPrice: null, maxPrice: null, inStock: false, specs: {} };

@@ -3,6 +3,7 @@ import { FunnelIcon, XMarkIcon, AdjustmentsHorizontalIcon, CheckIcon } from '@he
 import { Category } from '../../types';
 import { formatPrice } from '../../utils/formatters';
 import { EMPTY_FILTER, FilterState } from './filterState';
+import { SpecFacet, SpecSelection } from '../../utils/specFilters';
 
 
 const TYPES = [
@@ -20,6 +21,9 @@ interface ProductFilterProps {
   categoryCounts: Record<number, number>;
   brands: { name: string; count: number }[];
   priceBounds: { min: number; max: number };
+  specFacets: SpecFacet[];
+  specError: boolean;
+  onRetrySpecs: () => void;
 }
 
 const Section: React.FC<{ title: string; action?: React.ReactNode; children: React.ReactNode }> = ({ title, action, children }) => (
@@ -32,7 +36,7 @@ const Section: React.FC<{ title: string; action?: React.ReactNode; children: Rea
   </section>
 );
 
-const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onChange, typeCounts, categoryCounts, brands, priceBounds }) => {
+const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onChange, typeCounts, categoryCounts, brands, priceBounds, specFacets, specError, onRetrySpecs }) => {
   const set = (patch: Partial<FilterState>) => onChange({ ...filter, ...patch });
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
@@ -45,6 +49,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
     ...filter.brands.map((b) => ({ label: `Hãng: ${b}`, clear: () => set({ brands: filter.brands.filter((x) => x !== b) }) })),
     ...(filter.minPrice !== null || filter.maxPrice !== null ? [{ label: 'Khoảng giá', clear: () => set({ minPrice: null, maxPrice: null }) }] : []),
     ...(filter.inStock ? [{ label: 'Còn hàng', clear: () => set({ inStock: false }) }] : []),
+    ...Object.keys(filter.specs || {}).filter((id) => { const s = filter.specs![id]; return s.values?.length || s.min != null || s.max != null; }).map((id) => ({ label: `Thông số: ${specFacets.find((f) => f.id === id)?.key || id}`, clear: () => set({ specs: Object.fromEntries(Object.entries(filter.specs || {}).filter(([key]) => key !== id)) }) })),
   ];
 
   const maxValue = filter.maxPrice ?? priceBounds.max;
@@ -52,6 +57,18 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
 
   return (
     <div className="space-y-4">
+      <Section title="Lọc thông số chuyên sâu">
+        {specError && <div className="mb-3 text-xs text-red-600" role="alert">Không tải được thông số. <button type="button" onClick={onRetrySpecs} className="underline">Thử lại</button></div>}
+        {!filter.categories.length ? <p className="text-xs text-slate-500">Chọn một danh mục cụ thể bên dưới để lọc thông số của linh kiện.</p> : !specFacets.length ? <p className="text-xs text-slate-500">Danh mục chưa có thông số chuẩn để lọc. Bạn vẫn có thể lọc hãng và giá.</p> : <div className="space-y-4">{specFacets.map((facet) => {
+          const selection = filter.specs?.[facet.id] || {};
+          const update = (patch: SpecSelection) => set({ specs: { ...filter.specs, [facet.id]: { ...selection, ...patch } } });
+          return <fieldset key={facet.id}><legend className="mb-2 text-sm font-semibold text-slate-800">{facet.key}{facet.unit ? ` (${facet.unit})` : ''}</legend>{facet.type === 'number' ? <div className="grid grid-cols-2 gap-2">
+            <label className="text-xs text-slate-500">Từ<input className="frost-input mt-1 !px-2 !py-1.5" type="number" min={0} step="any" aria-label={`${facet.key} từ`} placeholder={String(facet.min)} value={selection.min ?? ''} onChange={(e) => update({ min: e.target.value === '' ? null : Number(e.target.value) })} /></label>
+            <label className="text-xs text-slate-500">Đến<input className="frost-input mt-1 !px-2 !py-1.5" type="number" min={selection.min ?? 0} step="any" aria-label={`${facet.key} đến`} placeholder={String(facet.max)} value={selection.max ?? ''} onChange={(e) => update({ max: e.target.value === '' ? null : Number(e.target.value) })} /></label>
+            {selection.min != null && selection.max != null && selection.min > selection.max && <p className="col-span-2 text-xs text-red-600">Giá trị từ phải nhỏ hơn hoặc bằng đến.</p>}
+          </div> : <div className="max-h-44 space-y-2 overflow-y-auto">{facet.options.map((option) => <label key={option} className="flex gap-2 text-sm text-slate-700"><input type="checkbox" checked={selection.values?.includes(option) || false} onChange={() => update({ values: toggle(selection.values || [], option) })} />{option}</label>)}</div>}</fieldset>;
+        })}</div>}
+      </Section>
       {/* Bộ lọc đang chọn */}
       <section className="frost-card p-4">
         <div className="flex items-start justify-between gap-2">

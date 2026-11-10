@@ -25,6 +25,10 @@ export interface Product {
   category_id: number;
   category_name?: string;
   category_type?: string;
+  brand_name?: string | null;
+  brand_id?: number | null;
+  spec_template_id?: number | null;
+  warranty_months?: number;
   image_url?: string;
   image_urls?: string[];
   specs: ProductSpecs;

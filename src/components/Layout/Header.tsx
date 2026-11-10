@@ -19,6 +19,8 @@ import { useAuth } from '../../hooks/useAuth';
 import ThemeToggle from '../Common/ThemeToggle';
 import Logo from '../Common/Logo';
 
+const CUSTOMER_LINKS = [['/account/wishlist', 'Yêu thích'], ['/account/warranty', 'Tra cứu bảo hành'], ['/account/returns', 'Yêu cầu đổi trả'], ['/account/stock-alerts', 'Báo hàng về qua email']];
+
 const NAV = [
   { to: '/products', label: 'Sản phẩm', type: null },
   { to: '/products?type=pc', label: 'Máy tính', type: 'pc' },
@@ -226,6 +228,7 @@ const Header: React.FC = () => {
                   <Link to="/account/orders" className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
                     <ClipboardDocumentListIcon className="h-4 w-4" /> Đơn hàng của tôi
                   </Link>
+                  {CUSTOMER_LINKS.map(([to, label]) => <Link key={to} to={to} onClick={() => { setUserMenu(false); setIsMobileMenuOpen(false); }} className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">{label}</Link>)}
                   <button onClick={handleLogout} className="flex w-full items-center gap-2 border-t border-slate-200 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
                     <ArrowRightOnRectangleIcon className="h-4 w-4" /> Đăng xuất
                   </button>
@@ -335,6 +338,7 @@ const Header: React.FC = () => {
                   <Link to="/account/orders" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
                     <ClipboardDocumentListIcon className="h-5 w-5" /> Đơn hàng của tôi
                   </Link>
+                  {CUSTOMER_LINKS.map(([to, label]) => <Link key={to} to={to} onClick={() => { setUserMenu(false); setIsMobileMenuOpen(false); }} className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">{label}</Link>)}
                   <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 hover:bg-red-50">
                     <ArrowRightOnRectangleIcon className="h-5 w-5" /> Đăng xuất
                   </button>

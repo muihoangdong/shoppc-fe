@@ -5,20 +5,17 @@ import { formatPrice } from '../../utils/formatters';
 import { useCart } from '../../hooks/useCart';
 import {
   ShoppingCartIcon,
-  HeartIcon,
   CheckIcon,
   CubeIcon,
   DevicePhoneMobileIcon,
-  BellAlertIcon,
   ShieldCheckIcon,
   TruckIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { motion } from 'framer-motion';
-import toast from 'react-hot-toast';
+import { WishlistButton, StockAlertButton } from './CustomerProductActions';
 import ProductGallery from './ProductGallery';
-import { getBrand, getDiscount, restockWatch, stockState, STOCK_LABEL } from '../../utils/productMeta';
+import { getBrand, getDiscount, stockState, STOCK_LABEL } from '../../utils/productMeta';
 import { has3d, preloadModelViewer } from '../Product3D/model3d';
 
 // Trình xem 3D (three.js + model-viewer) chỉ tải khi khách bấm xem
@@ -38,10 +35,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
   const { addToCart } = useCart();
   const [searchParams, setSearchParams] = useSearchParams();
   const [quantity, setQuantity] = useState(1);
-  const [isWishlist, setIsWishlist] = useState(false);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
-  const [watching, setWatching] = useState(() => restockWatch.has(product.id));
   // Mở thẳng trình xem 3D khi vào từ mã QR (?view=3d) — tiện cho khách quét mã từ máy tính sang điện thoại
   const [viewerOpen, setViewerOpen] = useState(() => searchParams.get('view') === '3d');
   const preferAr = searchParams.get('ar') === '1';
@@ -81,12 +76,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
     setAdded(true);
     setQuantity(1);
     window.setTimeout(() => setAdded(false), 1500);
-  };
-
-  const toggleWatch = () => {
-    const on = restockWatch.toggle(product.id);
-    setWatching(on);
-    toast.success(on ? 'Sẽ báo cho bạn khi sản phẩm có hàng trở lại' : 'Đã tắt báo khi có hàng');
   };
 
   const specsList = product.specs ? Object.entries(product.specs) : [];
@@ -211,38 +200,16 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
                 {adding ? 'Đang thêm…' : added ? 'Đã thêm vào giỏ' : 'Thêm vào giỏ hàng'}
               </motion.button>
             ) : (
-              <button
-                type="button"
-                onClick={toggleWatch}
-                aria-pressed={watching}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-6 py-3 font-semibold transition ${
-                  watching ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-slate-300 bg-white text-slate-700 hover:border-blue-300 hover:text-blue-700'
-                }`}
-              >
-                <BellAlertIcon className="h-5 w-5" />
-                {watching ? 'Đang chờ hàng về · bấm để tắt' : 'Báo khi có hàng'}
-              </button>
+              <StockAlertButton id={product.id} />
             )}
-
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              aria-label={isWishlist ? 'Bỏ yêu thích' : 'Yêu thích'}
-              aria-pressed={isWishlist}
-              onClick={() => {
-                setIsWishlist(!isWishlist);
-                toast.success(isWishlist ? 'Đã xóa khỏi yêu thích' : 'Đã thêm vào yêu thích');
-              }}
-              className="group rounded-lg border border-slate-300 px-5 py-3 transition hover:border-red-400"
-            >
-              {isWishlist ? <HeartSolidIcon className="h-5 w-5 text-red-500" /> : <HeartIcon className="h-5 w-5 text-slate-500 group-hover:text-red-500" />}
-            </motion.button>
+            <WishlistButton id={product.id} />
           </div>
 
           <ul className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
             {[
               { icon: ShieldCheckIcon, title: 'Chính hãng 100%', text: 'Đủ CO/CQ' },
               { icon: TruckIcon, title: 'Giao nhanh', text: 'Miễn phí từ 5 triệu' },
-              { icon: WrenchScrewdriverIcon, title: 'Bảo hành 12 tháng', text: 'Tại mọi chi nhánh' },
+              { icon: WrenchScrewdriverIcon, title: `Bảo hành ${product.warranty_months ?? 12} tháng`, text: 'Tại mọi chi nhánh' },
             ].map(({ icon: Icon, title, text }) => (
               <li key={title} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
                 <Icon className="h-5 w-5 shrink-0 text-blue-600" />

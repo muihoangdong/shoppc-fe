@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCartIcon, CheckIcon, BellAlertIcon, CubeIcon } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { ShoppingCartIcon, CheckIcon, CubeIcon } from '@heroicons/react/24/outline';
 import { Product } from '../../types';
 import { formatPrice } from '../../utils/formatters';
 import { useCart } from '../../hooks/useCart';
 import FadeImage from '../Common/FadeImage';
-import { getBrand, getDiscount, isNew, keySpecs, priceOf, restockWatch, stockState, STOCK_LABEL } from '../../utils/productMeta';
+import { getBrand, getDiscount, isNew, keySpecs, priceOf, stockState, STOCK_LABEL } from '../../utils/productMeta';
+import { WishlistButton, StockAlertButton } from './CustomerProductActions';
 import { has3d } from '../Product3D/model3d';
 
 interface ProductCardProps {
@@ -26,7 +26,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, view = 'grid' }) => 
   const { addToCart } = useCart();
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
-  const [watching, setWatching] = useState(() => restockWatch.has(product.id));
   const state = stockState(product.stock);
   const outOfStock = state === 'out';
   const discount = getDiscount(product);
@@ -45,24 +44,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, view = 'grid' }) => 
     window.setTimeout(() => setAdded(false), 1500);
   };
 
-  const handleWatch = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const on = restockWatch.toggle(product.id);
-    setWatching(on);
-    toast.success(on ? 'Sẽ báo cho bạn khi sản phẩm có hàng trở lại' : 'Đã tắt báo khi có hàng');
-  };
-
   const action = outOfStock ? (
-    <button
-      type="button"
-      onClick={handleWatch}
-      aria-pressed={watching}
-      className={`frost-btn-ghost w-full !py-2 ${watching ? '!border-blue-300 !text-blue-700' : ''}`}
-    >
-      <BellAlertIcon className="h-4 w-4" />
-      {watching ? 'Đang chờ hàng' : 'Báo khi có hàng'}
-    </button>
+    <StockAlertButton id={product.id} />
   ) : (
     <button
       type="button"
@@ -94,6 +77,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, view = 'grid' }) => 
       ) : (
         <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">Chưa có ảnh</div>
       )}
+      <div className="absolute right-2 top-2"><WishlistButton id={product.id} /></div>
       {has3d(product) && (
         <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-md border border-blue-200 bg-white/90 px-1.5 py-0.5 text-[10px] font-bold text-blue-700">
           <CubeIcon className="h-3 w-3" /> 3D · AR

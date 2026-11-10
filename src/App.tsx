@@ -21,12 +21,15 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import ScrollToTop from './components/Common/ScrollToTop';
 import SupportChat from './components/Chat/SupportChat';
+import { CustomerProvider } from './contexts/CustomerContext';
+import CustomerAccountPage from './pages/CustomerAccountPage';
 
 function App() {
   return (
     <Router>
       <ScrollToTop />
       <AuthProvider>
+        <CustomerProvider>
         <CartProvider>
           {/* Layout bao bọc toàn bộ routes */}
           <Layout>
@@ -49,6 +52,10 @@ function App() {
               <Route path="/return" element={<PolicyPage slug="return" />} />
               
               {/* Protected routes - yêu cầu đăng nhập */}
+              <Route path="/account/wishlist" element={<ProtectedRoute><CustomerAccountPage key="wishlist" kind="wishlist" /></ProtectedRoute>} />
+              <Route path="/account/warranty" element={<ProtectedRoute><CustomerAccountPage key="warranty" kind="warranty" /></ProtectedRoute>} />
+              <Route path="/account/returns" element={<ProtectedRoute><CustomerAccountPage key="returns" kind="returns" /></ProtectedRoute>} />
+              <Route path="/account/stock-alerts" element={<ProtectedRoute><CustomerAccountPage key="alerts" kind="alerts" /></ProtectedRoute>} />
               <Route 
                 path="/account" 
                 element={
@@ -135,6 +142,7 @@ function App() {
             }}
           />
         </CartProvider>
+        </CustomerProvider>
       </AuthProvider>
     </Router>
   );
