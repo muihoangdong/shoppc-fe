@@ -1,3 +1,4 @@
+import AccountNavigation from '../components/Common/AccountNavigation';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -123,7 +124,7 @@ export default function MyOrderDetailPage() {
   const address = [order.customer_address, order.customer_ward, order.customer_district, order.customer_city].filter(Boolean).join(', ');
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="container mx-auto max-w-4xl px-4 py-8"><AccountNavigation />
       <Link to="/account/orders" className="text-sm font-medium text-blue-600 hover:underline">← Đơn hàng của tôi</Link>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">

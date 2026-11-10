@@ -38,21 +38,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, view = 'grid' }) => 
     e.stopPropagation();
     if (adding || outOfStock) return;
     setAdding(true);
-    await addToCart(product.id);
+    const success = await addToCart(product.id);
     setAdding(false);
+    if (!success) return;
     setAdded(true);
     window.setTimeout(() => setAdded(false), 1500);
   };
 
   const action = outOfStock ? (
-    <StockAlertButton id={product.id} />
+    <div className="relative z-10"><StockAlertButton id={product.id} /></div>
   ) : (
     <button
       type="button"
       onClick={handleAddToCart}
       disabled={adding}
       aria-label={`Thêm ${product.name} vào giỏ hàng`}
-      className={`frost-btn w-full !py-2 ${added ? '!bg-green-600' : ''}`}
+      className={`frost-btn relative z-10 w-full !py-2 ${added ? '!bg-green-600' : ''}`}
     >
       {adding ? (
         <span className="block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -66,18 +67,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, view = 'grid' }) => 
   );
 
   const image = (
-    <div className={`relative overflow-hidden rounded-lg border border-slate-200 bg-gradient-to-b from-slate-50 to-white ${view === 'list' ? 'h-40 w-40 shrink-0 sm:h-44 sm:w-52' : 'aspect-[4/3]'}`}>
+    <div className={`relative overflow-hidden rounded-lg bg-slate-50 ${view === 'list' ? 'h-40 w-40 shrink-0 sm:h-44 sm:w-52' : 'aspect-[4/3]'}`}>
       {product.image_url ? (
         <FadeImage
           src={product.image_url}
           alt={product.name}
           loading="lazy"
-          className={`h-full w-full object-contain p-3 group-hover:scale-105 ${outOfStock ? 'opacity-60 grayscale' : ''}`}
+          className={`h-full w-full object-contain p-3 ${outOfStock ? 'opacity-60 grayscale' : ''}`}
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">Chưa có ảnh</div>
       )}
-      <div className="absolute right-2 top-2"><WishlistButton id={product.id} /></div>
+      <div className="absolute right-2 top-2 z-10"><WishlistButton id={product.id} /></div>
       {has3d(product) && (
         <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-md border border-blue-200 bg-white/90 px-1.5 py-0.5 text-[10px] font-bold text-blue-700">
           <CubeIcon className="h-3 w-3" /> 3D · AR
@@ -88,7 +89,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, view = 'grid' }) => 
 
   const header = (
     <div className="mb-2 flex items-center justify-between gap-2">
-      {badge ? <span className="frost-chip border-red-600 bg-red-600 text-white">{badge}</span> : <span />}
+      {badge ? <span className="frost-chip border-blue-200 bg-blue-50 text-blue-700">{badge}</span> : <span />}
       <span className={`frost-chip ${STOCK_STYLE[state]}`}>{STOCK_LABEL[state]}</span>
     </div>
   );
@@ -100,8 +101,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, view = 'grid' }) => 
     </div>
   );
 
-  const specTable = specs.length > 0 && (
-    <dl className="mt-2 space-y-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-[11px]">
+  const specTable = (
+    <dl className="mt-2 min-h-[3.5rem] space-y-1 rounded-lg bg-slate-50 px-2.5 py-2 text-[11px]">
       {specs.map(([k, v]) => (
         <div key={k} className="flex gap-2">
           <dt className="w-20 shrink-0 truncate capitalize text-slate-500">{k}:</dt>
@@ -125,43 +126,41 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, view = 'grid' }) => 
 
   if (view === 'list') {
     return (
-      <Link
-        to={`/products/${product.id}`}
-        className="group frost-card flex gap-4 p-3 transition duration-200 hover:border-blue-300 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600 sm:p-4"
+      <article
+        className="group relative frost-card flex gap-4 p-3 transition duration-200 hover:border-blue-300 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600 sm:p-4"
       >
         {image}
         <div className="flex min-w-0 flex-1 flex-col">
           {header}
           {meta}
-          <h3 className="line-clamp-2 text-sm font-semibold text-slate-900 sm:text-base">{product.name}</h3>
+          <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-semibold text-slate-900 sm:text-base"><Link to={`/products/${product.id}`} className="after:absolute after:inset-0 after:rounded-xl">{product.name}</Link></h3>
           {product.description && <p className="mt-1 hidden text-sm text-slate-500 sm:line-clamp-2">{product.description}</p>}
-          <div className="hidden sm:block">{specTable}</div>
+          <div>{specTable}</div>
           <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-3">
             {price}
             <div className="w-full sm:w-44">{action}</div>
           </div>
         </div>
-      </Link>
+      </article>
     );
   }
 
   return (
-    <Link
-      to={`/products/${product.id}`}
-      className="group frost-card flex h-full flex-col p-3 transition duration-200 hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
+    <article
+      className="group relative frost-card flex h-full flex-col p-3 transition duration-200 hover:border-blue-300 hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
     >
       {header}
       {image}
       <div className="flex flex-1 flex-col pt-3">
         {meta}
-        <h3 className="line-clamp-2 text-sm font-semibold text-slate-900 sm:text-[15px]">{product.name}</h3>
-        <div className="hidden sm:block">{specTable}</div>
+        <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-semibold text-slate-900 sm:text-[15px]"><Link to={`/products/${product.id}`} className="after:absolute after:inset-0 after:rounded-xl">{product.name}</Link></h3>
+        <div>{specTable}</div>
         <div className="mt-auto space-y-3 pt-3">
           {price}
           {action}
         </div>
       </div>
-    </Link>
+    </article>
   );
 };
 

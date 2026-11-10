@@ -11,6 +11,8 @@ interface Props {
 
 const ProductGallery: React.FC<Props> = ({ images, name, badge, onOpen3d }) => {
   const [active, setActive] = useState(0);
+  const [edges, setEdges] = useState({ left: false, right: false });
+  const updateEdges = () => { const el = thumbs.current; if (el) setEdges({ left: el.scrollLeft > 1, right: el.scrollLeft + el.clientWidth < el.scrollWidth - 1 }); };
   const [zoomOpen, setZoomOpen] = useState(false);
   const thumbs = useRef<HTMLDivElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -20,8 +22,21 @@ const ProductGallery: React.FC<Props> = ({ images, name, badge, onOpen3d }) => {
 
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    thumbs.current?.querySelector<HTMLElement>(`[data-index="${index}"]`)?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: reduced ? 'auto' : 'smooth' });
+    const container = thumbs.current;
+    const thumbnail = container?.querySelector<HTMLElement>(`[data-index="${index}"]`);
+    if (container && thumbnail) {
+      const delta = thumbnail.getBoundingClientRect().left - container.getBoundingClientRect().left;
+      const beyond = delta + thumbnail.offsetWidth - container.clientWidth;
+      if (delta < 0 || beyond > 0) container.scrollBy({ left: delta < 0 ? delta : beyond, behavior: reduced ? 'auto' : 'smooth' });
+    }
   }, [index]);
+
+  useEffect(() => {
+    const observer = new ResizeObserver(updateEdges);
+    if (thumbs.current) observer.observe(thumbs.current);
+    updateEdges();
+    return () => observer.disconnect();
+  }, [images.length, onOpen3d]);
 
   return (
     <section aria-label={`Thư viện ảnh ${name}`} className="min-w-0"
@@ -30,6 +45,7 @@ const ProductGallery: React.FC<Props> = ({ images, name, badge, onOpen3d }) => {
         if (e.key === 'ArrowLeft') { e.preventDefault(); navigate(-1); }
         if (e.key === 'ArrowRight') { e.preventDefault(); navigate(1); }
       }}>
+      <div className="mb-3 flex items-center justify-between gap-2"><span className="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700"><PhotoIcon className="h-4 w-4" />Ảnh ({images.length})</span>{onOpen3d && <button type="button" onClick={onOpen3d} className="frost-btn-ghost !py-2"><CubeIcon className="h-4 w-4" />Mô hình 3D / AR</button>}</div>
       <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white"
         onTouchStart={(e) => { touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
         onTouchCancel={() => { touch.current = null; }}
@@ -60,19 +76,20 @@ const ProductGallery: React.FC<Props> = ({ images, name, badge, onOpen3d }) => {
 
       {(images.length > 0 || onOpen3d) && (
         <div className="relative mt-3 px-5">
-          <button type="button" aria-label="Cuộn ảnh thu nhỏ sang trái" onClick={() => thumbs.current?.scrollBy({ left: -240, behavior: 'smooth' })} className="absolute -left-1 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-200 bg-white p-1 text-slate-600 shadow"><ChevronLeftIcon className="h-4 w-4" /></button>
-          <div ref={thumbs} className="flex gap-2 overflow-x-auto py-1" style={{ scrollbarWidth: 'thin' }}>
+          <button type="button" disabled={!edges.left} aria-label="Cuộn ảnh thu nhỏ sang trái" onClick={() => thumbs.current?.scrollBy({ left: -240, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })} className="absolute -left-1 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-200 bg-white p-1 text-slate-600 shadow disabled:opacity-30"><ChevronLeftIcon className="h-4 w-4" /></button>
+          <div ref={thumbs} onScroll={updateEdges} className="flex gap-2 overflow-x-auto py-1" style={{ scrollbarWidth: 'thin' }}>
             {images.map((url, i) => (
               <button key={url} data-index={i} type="button" onClick={() => setActive(i)} aria-label={`Xem ảnh ${i + 1}`} aria-pressed={index === i}
-                className={`flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 bg-white p-1 transition ${index === i ? 'border-slate-800' : 'border-slate-200 hover:border-blue-400'}`}>
+                className={`flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 bg-white p-1 transition ${index === i ? 'border-blue-600' : 'border-slate-200 hover:border-blue-400'}`}>
                 <img src={url} alt={`Ảnh thu nhỏ ${i + 1}`} loading="lazy" className="h-full w-full object-contain" />
               </button>
             ))}
             {onOpen3d && <button type="button" aria-label="Xem mô hình 3D" onClick={onOpen3d} className="flex h-[4.5rem] w-[4.5rem] shrink-0 flex-col items-center justify-center gap-1 rounded-lg border-2 border-blue-200 bg-blue-50 text-blue-600"><CubeIcon className="h-6 w-6" /><span className="text-xs font-semibold">3D · AR</span></button>}
           </div>
-          <button type="button" aria-label="Cuộn ảnh thu nhỏ sang phải" onClick={() => thumbs.current?.scrollBy({ left: 240, behavior: 'smooth' })} className="absolute -right-1 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-200 bg-white p-1 text-slate-600 shadow"><ChevronRightIcon className="h-4 w-4" /></button>
+          <button type="button" disabled={!edges.right} aria-label="Cuộn ảnh thu nhỏ sang phải" onClick={() => thumbs.current?.scrollBy({ left: 240, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })} className="absolute -right-1 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-200 bg-white p-1 text-slate-600 shadow disabled:opacity-30"><ChevronRightIcon className="h-4 w-4" /></button>
         </div>
       )}
+      {images.length > 1 && <p className="mt-2 text-center text-[11px] text-slate-500">{index + 1}/{images.length} ảnh · Vuốt hoặc bấm mũi tên để xem thêm</p>}
       {zoomOpen && images.length > 0 && <ImageLightbox src={images[index]} images={images} initialIndex={index} onImageChange={setActive} alt={name} onClose={closeZoom} />}
     </section>
   );

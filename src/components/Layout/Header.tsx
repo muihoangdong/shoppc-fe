@@ -133,7 +133,7 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
         <div className="container mx-auto flex items-center gap-3 px-4 py-3 lg:gap-6">
           <Link to="/" className="shrink-0" aria-label="Shoppc - Trang chủ">
             <Logo />

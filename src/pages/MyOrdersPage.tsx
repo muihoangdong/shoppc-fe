@@ -1,3 +1,4 @@
+import AccountNavigation from '../components/Common/AccountNavigation';
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ShoppingBagIcon, ArrowPathIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
@@ -98,7 +99,7 @@ export default function MyOrdersPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="container mx-auto max-w-4xl px-4 py-8"><AccountNavigation />
       <div className="mb-6 flex flex-wrap items-end justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Đơn hàng của tôi</h1>

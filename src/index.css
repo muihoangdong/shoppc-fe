@@ -28,7 +28,7 @@
   /* ── Giao diện "Starforge Frost": thẻ, nhãn, nút dùng chung ── */
   /* Thẻ nền surface viền mảnh (đổi màu theo sáng/tối nhờ biến) */
   .frost-card {
-    @apply rounded-xl border border-slate-200 bg-white shadow-[0_1px_2px_rgb(15_40_80/0.04),0_6px_20px_-12px_rgb(15_40_80/0.18)];
+    @apply rounded-xl border border-slate-200 bg-white;
   }
   /* Nhãn nhỏ kiểu kỹ thuật: chữ mono in hoa giãn chữ */
   .frost-label {
@@ -112,3 +112,6 @@ model-viewer {
 .dark .bg-white\/85 { background-color: rgb(var(--surface) / 0.85); }
 .dark .bg-white\/90 { background-color: rgb(var(--surface) / 0.9); }
 .dark .bg-white\/95 { background-color: rgb(var(--surface) / 0.95); }
+
+/* Surface role applies after generated utility classes. */
+.bg-white { background-color: rgb(var(--surface) / var(--tw-bg-opacity, 1)); }

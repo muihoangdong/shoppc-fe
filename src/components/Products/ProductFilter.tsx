@@ -5,7 +5,6 @@ import { formatPrice } from '../../utils/formatters';
 import { EMPTY_FILTER, FilterState } from './filterState';
 import { SpecFacet, SpecSelection } from '../../utils/specFilters';
 
-
 const TYPES = [
   { value: null, label: 'Tất cả sản phẩm' },
   { value: 'component', label: 'Linh kiện PC' },
@@ -26,7 +25,11 @@ interface ProductFilterProps {
   onRetrySpecs: () => void;
 }
 
-const Section: React.FC<{ title: string; action?: React.ReactNode; children: React.ReactNode }> = ({ title, action, children }) => (
+const Section: React.FC<{ title: string; action?: React.ReactNode; children: React.ReactNode }> = ({
+  title,
+  action,
+  children,
+}) => (
   <section className="frost-card p-4">
     <div className="mb-3 flex items-center justify-between">
       <h3 className="frost-label !text-slate-800">{title}</h3>
@@ -36,21 +39,94 @@ const Section: React.FC<{ title: string; action?: React.ReactNode; children: Rea
   </section>
 );
 
-const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onChange, typeCounts, categoryCounts, brands, priceBounds, specFacets, specError, onRetrySpecs }) => {
+type ChipProps = Pick<ProductFilterProps, 'filter' | 'categories' | 'specFacets' | 'onChange'>;
+const getFilterChips = ({
+  filter,
+  categories,
+  specFacets,
+  onChange,
+}: ChipProps): { label: string; clear: () => void }[] => {
+  const set = (patch: Partial<FilterState>) => onChange({ ...filter, ...patch });
+  const catName = (id: number) => categories.find((c) => c.id === id)?.name || `#${id}`;
+  return [
+    ...(filter.type
+      ? [
+          {
+            label: TYPES.find((t) => t.value === filter.type)?.label || filter.type,
+            clear: () => set({ type: null, categories: [] }),
+          },
+        ]
+      : []),
+    ...filter.categories.map((id) => ({
+      label: catName(id),
+      clear: () => set({ categories: filter.categories.filter((x) => x !== id) }),
+    })),
+    ...filter.brands.map((b) => ({
+      label: `Hãng: ${b}`,
+      clear: () => set({ brands: filter.brands.filter((x) => x !== b) }),
+    })),
+    ...(filter.minPrice !== null || filter.maxPrice !== null
+      ? [{ label: 'Khoảng giá', clear: () => set({ minPrice: null, maxPrice: null }) }]
+      : []),
+    ...(filter.inStock ? [{ label: 'Còn hàng', clear: () => set({ inStock: false }) }] : []),
+    ...Object.keys(filter.specs || {})
+      .filter((id) => {
+        const s = filter.specs![id];
+        return s.values?.length || s.min != null || s.max != null;
+      })
+      .map((id) => ({
+        label: `Thông số: ${specFacets.find((f) => f.id === id)?.key || id}`,
+        clear: () =>
+          set({ specs: Object.fromEntries(Object.entries(filter.specs || {}).filter(([key]) => key !== id)) }),
+      })),
+  ];
+};
+export function ActiveFilters(props: ChipProps) {
+  const chips = getFilterChips(props);
+  if (!chips.length) return null;
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-2" aria-label="Bộ lọc đang áp dụng">
+      <span className="text-xs text-slate-500">Đang lọc:</span>
+      {chips.map((chip) => (
+        <button
+          key={chip.label}
+          type="button"
+          onClick={chip.clear}
+          className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-700"
+        >
+          {chip.label}
+          <XMarkIcon className="h-3 w-3" />
+        </button>
+      ))}
+      <button
+        type="button"
+        onClick={() => props.onChange(EMPTY_FILTER)}
+        className="px-2 py-2 text-xs text-slate-500 underline"
+      >
+        Xóa tất cả
+      </button>
+    </div>
+  );
+}
+
+const ProductFilter: React.FC<ProductFilterProps> = ({
+  categories,
+  filter,
+  onChange,
+  typeCounts,
+  categoryCounts,
+  brands,
+  priceBounds,
+  specFacets,
+  specError,
+  onRetrySpecs,
+}) => {
   const set = (patch: Partial<FilterState>) => onChange({ ...filter, ...patch });
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
   const visibleCategories = categories.filter((c) => !filter.type || c.type === filter.type);
-  const catName = (id: number) => categories.find((c) => c.id === id)?.name || `#${id}`;
 
-  const chips: { label: string; clear: () => void }[] = [
-    ...(filter.type ? [{ label: TYPES.find((t) => t.value === filter.type)?.label || filter.type, clear: () => set({ type: null, categories: [] }) }] : []),
-    ...filter.categories.map((id) => ({ label: catName(id), clear: () => set({ categories: filter.categories.filter((x) => x !== id) }) })),
-    ...filter.brands.map((b) => ({ label: `Hãng: ${b}`, clear: () => set({ brands: filter.brands.filter((x) => x !== b) }) })),
-    ...(filter.minPrice !== null || filter.maxPrice !== null ? [{ label: 'Khoảng giá', clear: () => set({ minPrice: null, maxPrice: null }) }] : []),
-    ...(filter.inStock ? [{ label: 'Còn hàng', clear: () => set({ inStock: false }) }] : []),
-    ...Object.keys(filter.specs || {}).filter((id) => { const s = filter.specs![id]; return s.values?.length || s.min != null || s.max != null; }).map((id) => ({ label: `Thông số: ${specFacets.find((f) => f.id === id)?.key || id}`, clear: () => set({ specs: Object.fromEntries(Object.entries(filter.specs || {}).filter(([key]) => key !== id)) }) })),
-  ];
+  const chips = getFilterChips({ filter, categories, specFacets, onChange });
 
   const maxValue = filter.maxPrice ?? priceBounds.max;
   const step = Math.max(10000, Math.round(priceBounds.max / 200 / 10000) * 10000);
@@ -58,16 +134,83 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
   return (
     <div className="space-y-4">
       <Section title="Lọc thông số chuyên sâu">
-        {specError && <div className="mb-3 text-xs text-red-600" role="alert">Không tải được thông số. <button type="button" onClick={onRetrySpecs} className="underline">Thử lại</button></div>}
-        {!filter.categories.length ? <p className="text-xs text-slate-500">Chọn một danh mục cụ thể bên dưới để lọc thông số của linh kiện.</p> : !specFacets.length ? <p className="text-xs text-slate-500">Danh mục chưa có thông số chuẩn để lọc. Bạn vẫn có thể lọc hãng và giá.</p> : <div className="space-y-4">{specFacets.map((facet) => {
-          const selection = filter.specs?.[facet.id] || {};
-          const update = (patch: SpecSelection) => set({ specs: { ...filter.specs, [facet.id]: { ...selection, ...patch } } });
-          return <fieldset key={facet.id}><legend className="mb-2 text-sm font-semibold text-slate-800">{facet.key}{facet.unit ? ` (${facet.unit})` : ''}</legend>{facet.type === 'number' ? <div className="grid grid-cols-2 gap-2">
-            <label className="text-xs text-slate-500">Từ<input className="frost-input mt-1 !px-2 !py-1.5" type="number" min={0} step="any" aria-label={`${facet.key} từ`} placeholder={String(facet.min)} value={selection.min ?? ''} onChange={(e) => update({ min: e.target.value === '' ? null : Number(e.target.value) })} /></label>
-            <label className="text-xs text-slate-500">Đến<input className="frost-input mt-1 !px-2 !py-1.5" type="number" min={selection.min ?? 0} step="any" aria-label={`${facet.key} đến`} placeholder={String(facet.max)} value={selection.max ?? ''} onChange={(e) => update({ max: e.target.value === '' ? null : Number(e.target.value) })} /></label>
-            {selection.min != null && selection.max != null && selection.min > selection.max && <p className="col-span-2 text-xs text-red-600">Giá trị từ phải nhỏ hơn hoặc bằng đến.</p>}
-          </div> : <div className="max-h-44 space-y-2 overflow-y-auto">{facet.options.map((option) => <label key={option} className="flex gap-2 text-sm text-slate-700"><input type="checkbox" checked={selection.values?.includes(option) || false} onChange={() => update({ values: toggle(selection.values || [], option) })} />{option}</label>)}</div>}</fieldset>;
-        })}</div>}
+        {specError && (
+          <div className="mb-3 text-xs text-red-600" role="alert">
+            Không tải được thông số.{' '}
+            <button type="button" onClick={onRetrySpecs} className="underline">
+              Thử lại
+            </button>
+          </div>
+        )}
+        {!filter.categories.length ? (
+          <p className="text-xs text-slate-500">Chọn một danh mục cụ thể bên dưới để lọc thông số của linh kiện.</p>
+        ) : !specFacets.length ? (
+          <p className="text-xs text-slate-500">
+            Danh mục chưa có thông số chuẩn để lọc. Bạn vẫn có thể lọc hãng và giá.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {specFacets.map((facet) => {
+              const selection = filter.specs?.[facet.id] || {};
+              const update = (patch: SpecSelection) =>
+                set({ specs: { ...filter.specs, [facet.id]: { ...selection, ...patch } } });
+              return (
+                <fieldset key={facet.id}>
+                  <legend className="mb-2 text-sm font-semibold text-slate-800">
+                    {facet.key}
+                    {facet.unit ? ` (${facet.unit})` : ''}
+                  </legend>
+                  {facet.type === 'number' ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      <label className="text-xs text-slate-500">
+                        Từ
+                        <input
+                          className="frost-input mt-1 !px-2 !py-1.5"
+                          type="number"
+                          min={0}
+                          step="any"
+                          aria-label={`${facet.key} từ`}
+                          placeholder={String(facet.min)}
+                          value={selection.min ?? ''}
+                          onChange={(e) => update({ min: e.target.value === '' ? null : Number(e.target.value) })}
+                        />
+                      </label>
+                      <label className="text-xs text-slate-500">
+                        Đến
+                        <input
+                          className="frost-input mt-1 !px-2 !py-1.5"
+                          type="number"
+                          min={selection.min ?? 0}
+                          step="any"
+                          aria-label={`${facet.key} đến`}
+                          placeholder={String(facet.max)}
+                          value={selection.max ?? ''}
+                          onChange={(e) => update({ max: e.target.value === '' ? null : Number(e.target.value) })}
+                        />
+                      </label>
+                      {selection.min != null && selection.max != null && selection.min > selection.max && (
+                        <p className="col-span-2 text-xs text-red-600">Giá trị từ phải nhỏ hơn hoặc bằng đến.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="max-h-44 space-y-2 overflow-y-auto">
+                      {facet.options.map((option) => (
+                        <label key={option} className="flex gap-2 text-sm text-slate-700">
+                          <input
+                            type="checkbox"
+                            checked={selection.values?.includes(option) || false}
+                            onChange={() => update({ values: toggle(selection.values || [], option) })}
+                          />
+                          {option}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </fieldset>
+              );
+            })}
+          </div>
+        )}
       </Section>
       {/* Bộ lọc đang chọn */}
       <section className="frost-card p-4">
@@ -76,7 +219,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
             <FunnelIcon className="h-5 w-5 text-blue-600" /> Bộ lọc tuyển chọn
           </h2>
           {chips.length > 0 && (
-            <button type="button" onClick={() => onChange(EMPTY_FILTER)} className="text-[11px] text-blue-600 hover:underline">
+            <button
+              type="button"
+              onClick={() => onChange(EMPTY_FILTER)}
+              className="text-[11px] text-blue-600 hover:underline"
+            >
               Đặt lại ({chips.length})
             </button>
           )}
@@ -110,14 +257,20 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
                   type="button"
                   onClick={() => set({ type: t.value, categories: [] })}
                   className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition ${
-                    active ? 'border-blue-200 bg-blue-50 font-semibold text-blue-700' : 'border-transparent text-slate-600 hover:bg-slate-50'
+                    active
+                      ? 'border-blue-200 bg-blue-50 font-semibold text-blue-700'
+                      : 'border-transparent text-slate-600 hover:bg-slate-50'
                   }`}
                 >
                   <span className="flex items-center gap-2">
                     {active && <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />}
                     {t.label}
                   </span>
-                  <span className={`rounded px-1.5 text-[10px] ${active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>{count}</span>
+                  <span
+                    className={`rounded px-1.5 text-[10px] ${active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}
+                  >
+                    {count}
+                  </span>
                 </button>
               </li>
             );
@@ -155,7 +308,14 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
       )}
 
       {brands.length > 0 && (
-        <Section title="Thương hiệu" action={filter.brands.length ? <span className="text-[10px] text-blue-600">Đã chọn {filter.brands.length}</span> : undefined}>
+        <Section
+          title="Thương hiệu"
+          action={
+            filter.brands.length ? (
+              <span className="text-[10px] text-blue-600">Đã chọn {filter.brands.length}</span>
+            ) : undefined
+          }
+        >
           <div className="flex flex-wrap gap-1.5">
             {brands.map((b) => {
               const active = filter.brands.includes(b.name);
@@ -166,7 +326,9 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
                   aria-pressed={active}
                   onClick={() => set({ brands: toggle(filter.brands, b.name) })}
                   className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[11px] transition ${
-                    active ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'
+                    active
+                      ? 'border-blue-600 bg-blue-600 text-white'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-blue-300'
                   }`}
                 >
                   {active && <CheckIcon className="h-3 w-3" />}
@@ -187,7 +349,9 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
             max={priceBounds.max}
             step={step}
             value={Math.min(maxValue, priceBounds.max)}
-            onChange={(e) => set({ maxPrice: Number(e.target.value) >= priceBounds.max ? null : Number(e.target.value) })}
+            onChange={(e) =>
+              set({ maxPrice: Number(e.target.value) >= priceBounds.max ? null : Number(e.target.value) })
+            }
             aria-label="Giá tối đa"
             className="frost-range w-full"
           />
@@ -233,7 +397,6 @@ const ProductFilter: React.FC<ProductFilterProps> = ({ categories, filter, onCha
           </label>
         </Section>
       )}
-
     </div>
   );
 };

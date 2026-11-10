@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 export interface CartContextType {
   cart: Cart;
   loading: boolean;
-  addToCart: (productId: number, quantity?: number) => Promise<void>;
+  addToCart: (productId: number, quantity?: number) => Promise<boolean>;
   updateQuantity: (productId: number, quantity: number) => Promise<void>;
   removeFromCart: (productId: number) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -46,9 +46,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await cartService.addToCart(productId, quantity);
       await refreshCart();
       toast.success('Đã thêm vào giỏ hàng');
+      return true;
     } catch (error) {
       console.error('Failed to add to cart:', error);
       toast.error('Không thể thêm vào giỏ hàng');
+      return false;
     }
   }, [refreshCart]);
 

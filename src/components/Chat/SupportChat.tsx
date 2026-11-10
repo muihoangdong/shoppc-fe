@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import useSupportChat from '../../hooks/useSupportChat';
 import { supportChat, ChatMessage } from '../../services/supportChat';
@@ -18,6 +19,7 @@ const ChatIcon = () => (
 
 /** Khung chat nổi cho khách: trò chuyện trực tiếp với nhân viên (realtime), có trợ lý AI trả lời khi nhân viên chưa phản hồi. */
 const SupportChat: React.FC = () => {
+  const productPage = /^\/products\/[^/]+$/.test(useLocation().pathname);
   const [open, setOpen] = useState(false);
   const chat = useSupportChat(open);
   const [text, setText] = useState('');
@@ -117,7 +119,7 @@ const SupportChat: React.FC = () => {
   return (
     <>
       {open && (
-        <div role="dialog" aria-label="Chat hỗ trợ" className="fixed bottom-24 right-4 z-50 flex h-[34rem] max-h-[calc(100vh-7rem)] w-[24rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:right-6">
+        <div role="dialog" aria-label="Chat hỗ trợ" className={`${productPage ? 'bottom-48 sm:bottom-24' : 'bottom-24'} fixed right-4 z-50 flex h-[34rem] max-h-[calc(100vh-7rem)] w-[24rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:right-6`}>
           <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-blue-700 to-blue-500 px-4 py-3 text-white">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15">
               <ChatIcon />
@@ -211,7 +213,7 @@ const SupportChat: React.FC = () => {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? 'Đóng chat hỗ trợ' : 'Mở chat hỗ trợ'}
-        className="fixed bottom-6 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-lg shadow-blue-600/30 transition hover:scale-105 sm:right-6"
+        className={`${productPage ? 'bottom-28 sm:bottom-6' : 'bottom-6'} fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-lg shadow-blue-600/30 transition hover:scale-105 sm:right-6`}
       >
         <ChatIcon />
         {!open && chat.unread > 0 && (

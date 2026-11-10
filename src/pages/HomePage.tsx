@@ -1,77 +1,137 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  ComputerDesktopIcon,
+  AcademicCapIcon,
+  BriefcaseIcon,
+  PaintBrushIcon,
+  ArrowRightIcon,
+} from '@heroicons/react/24/outline';
 import { productService } from '../services/productService';
 import { Product } from '../types';
 import ProductCard from '../components/Products/ProductCard';
-import LoadingSpinner from '../components/Common/LoadingSpinner';
 import { PRODUCT_GRID } from '../utils/layout';
 
-const HomePage = () => {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [pcProducts, setPcProducts] = useState<Product[]>([]);
-  const [componentProducts, setComponentProducts] = useState<Product[]>([]);
+const needs = [
+  { label: 'PC gaming', hint: 'Chơi game & giải trí', search: 'gaming', icon: ComputerDesktopIcon },
+  { label: 'Học tập', hint: 'Học online & làm bài', search: 'học', icon: AcademicCapIcon },
+  { label: 'Văn phòng', hint: 'Làm việc mỗi ngày', search: 'văn phòng', icon: BriefcaseIcon },
+  { label: 'Thiết kế', hint: 'Đồ họa & sáng tạo', search: 'đồ họa', icon: PaintBrushIcon },
+];
+export default function HomePage() {
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [error, setError] = useState(false);
+  const [retry, setRetry] = useState(0);
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [allProducts, pcList, componentList] = await Promise.all([
-          productService.getProducts(),
-          productService.getProductsByType('pc'),
-          productService.getProductsByType('component'),
-        ]);
-
-        setFeaturedProducts(allProducts.slice(0, 8)); // 2 hàng × 4
-        setPcProducts(pcList.slice(0, 4));
-        setComponentProducts(componentList.slice(0, 4));
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
+    let alive = true;
+    setLoading(true);
+    setError(false);
+    productService
+      .getProducts()
+      .then((list) => {
+        if (alive) setProducts(list);
+      })
+      .catch(() => {
+        if (alive) setError(true);
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+    return () => {
+      alive = false;
     };
-
-    fetchData();
-  }, []);
-
-  if (loading) return <LoadingSpinner />;
-
+  }, [retry]);
   return (
-    <div>
-
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-6 text-2xl font-bold text-slate-900">Sản phẩm nổi bật</h2>
-          <div className={PRODUCT_GRID}>
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+    <div className="container space-y-10 px-4 py-8 sm:py-10">
+      <section aria-labelledby="needs-title">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="mb-1 text-xs font-semibold text-blue-600">SHOPPC · CHỌN THEO NHU CẦU</p>
+            <h1 id="needs-title" className="text-2xl font-semibold text-slate-900 sm:text-3xl">
+              Tìm chiếc PC phù hợp với bạn
+            </h1>
           </div>
+          <Link to="/build-pc" className="text-sm font-medium text-blue-600 hover:underline">
+            Cấu hình PC →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {needs.map(({ label, hint, search, icon: Icon }) => (
+            <Link
+              key={label}
+              to={`/products?type=pc&search=${encodeURIComponent(search)}`}
+              className="flex items-center gap-3 rounded-xl bg-white p-4 transition-colors hover:bg-blue-50"
+            >
+              <span className="rounded-xl bg-blue-50 p-3 text-blue-600">
+                <Icon className="h-6 w-6" />
+              </span>
+              <span>
+                <span className="block text-sm font-semibold text-slate-900">{label}</span>
+                <span className="mt-1 hidden text-xs text-slate-500 sm:block">{hint}</span>
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
-
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-6 text-2xl font-bold text-slate-900">PC Gaming & Văn phòng</h2>
-          <div className={PRODUCT_GRID}>
-            {pcProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+      {error && (
+        <div role="alert" className="rounded-xl bg-white p-6">
+          <p className="text-sm text-red-600">Không tải được sản phẩm. Vui lòng thử lại.</p>
+          <button type="button" onClick={() => setRetry((v) => v + 1)} className="frost-btn-ghost mt-3">
+            Tải lại sản phẩm
+          </button>
         </div>
-      </section>
-
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <h2 className="mb-6 text-2xl font-bold text-slate-900">Linh kiện máy tính</h2>
-          <div className={PRODUCT_GRID}>
-            {componentProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+      )}
+      {[
+        {
+          title: 'Sản phẩm nổi bật',
+          subtitle: 'Khám phá sản phẩm mới trong cửa hàng',
+          list: products.slice(0, 8),
+          href: '/products',
+        },
+        {
+          title: 'PC Gaming & Văn phòng',
+          subtitle: 'Máy tính nguyên bộ cho từng nhu cầu',
+          list: products.filter((p) => p.category_type === 'pc').slice(0, 4),
+          href: '/products?type=pc',
+        },
+        {
+          title: 'Linh kiện máy tính',
+          subtitle: 'Chọn linh kiện để hoàn thiện cấu hình',
+          list: products.filter((p) => p.category_type === 'component').slice(0, 4),
+          href: '/products?type=component',
+        },
+      ].map(({ title, subtitle, list, href }) => (
+        <section key={title}>
+          <div className="mb-5 flex items-end justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-900 sm:text-2xl">{title}</h2>
+              <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+            </div>
+            <Link
+              to={href}
+              className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-blue-600 hover:underline sm:text-sm"
+            >
+              Xem tất cả <ArrowRightIcon className="h-4 w-4" />
+            </Link>
           </div>
-        </div>
-      </section>
+          <div className={PRODUCT_GRID} aria-busy={loading}>
+            {loading
+              ? Array.from({ length: 4 }, (_, i) => (
+                  <div key={i} aria-hidden="true" className="h-96 animate-pulse rounded-xl bg-slate-100" />
+                ))
+              : list.map((product) => <ProductCard key={product.id} product={product} />)}
+          </div>
+          {!loading && !error && !list.length && (
+            <div className="rounded-xl bg-white p-6 text-sm text-slate-500">
+              Chưa có sản phẩm trong nhóm này.{' '}
+              <Link to="/products" className="text-blue-600 underline">
+                Xem tất cả sản phẩm
+              </Link>
+            </div>
+          )}
+        </section>
+      ))}
     </div>
   );
-};
-
-export default HomePage;
+}

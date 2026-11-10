@@ -18,9 +18,8 @@ import { productService } from '../services/productService';
 import { categoryService } from '../services/categoryService';
 import { Product, Category } from '../types';
 import ProductCard from '../components/Products/ProductCard';
-import ProductFilter from '../components/Products/ProductFilter';
+import ProductFilter, { ActiveFilters } from '../components/Products/ProductFilter';
 import { EMPTY_FILTER, FilterState } from '../components/Products/filterState';
-import LoadingSpinner from '../components/Common/LoadingSpinner';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { getBrand, priceOf } from '../utils/productMeta';
 
@@ -58,6 +57,9 @@ const ProductsPage: React.FC = () => {
   const [saved] = useState(() => readView(location.key));
   const cached = lastLoad && lastLoad.search === searchParams.get('search') ? lastLoad : null;
   const [templates, setTemplates] = useState<SpecTemplate[]>([]);
+  const [loadError, setLoadError] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const filterDialog = useRef<HTMLDivElement>(null);
   const [specError, setSpecError] = useState(false);
   const [products, setProducts] = useState<Product[]>(cached?.products ?? []);
   const [categories, setCategories] = useState<Category[]>(cached?.categories ?? []);
@@ -77,6 +79,24 @@ const ProductsPage: React.FC = () => {
   const [view, setView] = useLocalStorage<'grid' | 'list'>('shoppc_products_view', 'grid');
   const [page, setPage] = useState(saved?.page ?? 1);
   const [filtersOpen, setFiltersOpen] = useState(false); // điện thoại: ngăn kéo bộ lọc
+
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    filterDialog.current?.focus();
+    const key = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFiltersOpen(false);
+      if (e.key !== 'Tab') return;
+      const controls = [...(filterDialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled),a[href]') || [])].filter((el) => el.getClientRects().length);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === filterDialog.current)) { e.preventDefault(); last?.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || document.activeElement === filterDialog.current)) { e.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener('keydown', key);
+    return () => { document.body.style.overflow = overflow; document.removeEventListener('keydown', key); previous?.focus(); };
+  }, [filtersOpen]);
 
   // Đổi bộ lọc / sắp xếp thì về trang 1 (làm ngay khi đổi, không dùng effect để không xóa trang đã khôi phục khi Quay lại)
   const setFilter = (next: FilterState) => {
@@ -114,6 +134,7 @@ const ProductsPage: React.FC = () => {
     const ticket = ++latest.current; // bỏ qua kết quả cũ nếu người dùng đã đổi tìm kiếm tiếp
     const fetchData = async () => {
       setRefreshing(true);
+      setLoadError(false);
       try {
         const [allCategories, productList] = await Promise.all([
           categoryService.getAllCategories(),
@@ -125,7 +146,7 @@ const ProductsPage: React.FC = () => {
         lastLoad = { search: searchParam, products: productList, categories: allCategories };
         setSyncedAt(new Date());
       } catch (error) {
-        console.error('Error fetching products:', error);
+        if (ticket === latest.current) setLoadError(true);
       } finally {
         if (ticket === latest.current) {
           setLoading(false);
@@ -134,7 +155,7 @@ const ProductsPage: React.FC = () => {
       }
     };
     fetchData();
-  }, [searchParam]);
+  }, [searchParam, retry]);
 
   // Danh mục con thuộc danh mục cha nào (chọn cha thì gồm cả con)
   const categoryIds = useMemo(() => {
@@ -206,7 +227,7 @@ const ProductsPage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <div className="container px-4 py-8" role="status" aria-label="Đang tải sản phẩm"><div className="mb-6 h-20 animate-pulse rounded-xl bg-slate-100" /><div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{Array.from({ length: 8 }, (_, i) => <div key={i} className="h-96 animate-pulse rounded-xl bg-slate-100" />)}</div></div>;
 
   const title = searchParam ? `Kết quả cho "${searchParam}"` : filter.type ? TYPE_TITLE[filter.type] || 'Sản phẩm' : 'Linh Kiện Máy Tính & PC';
   const filterPanel = (
@@ -280,6 +301,8 @@ const ProductsPage: React.FC = () => {
         <aside className="hidden lg:block lg:w-72 lg:shrink-0">{filterPanel}</aside>
 
         <div className="min-w-0 flex-1">
+          <ActiveFilters filter={filter} categories={categories} specFacets={specFacets} onChange={setFilter} />
+          {loadError && <div role="alert" className="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">Không tải được sản phẩm.{products.length > 0 ? ' Đang hiển thị dữ liệu lần trước.' : ''} <button type="button" onClick={() => setRetry((v) => v + 1)} className="underline">Thử lại</button></div>}
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[11px] text-slate-500">
             <span className="flex items-center gap-2">
               <CheckBadgeIcon className="h-4 w-4 text-blue-600" />
@@ -288,7 +311,7 @@ const ProductsPage: React.FC = () => {
             {syncedAt && <span>Đã đồng bộ giá & tồn kho lúc {syncedAt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>}
           </div>
 
-          {filtered.length === 0 ? (
+          {loadError && !products.length ? null : filtered.length === 0 ? (
             <div className="frost-card py-16 text-center">
               <p className="text-slate-500">Không tìm thấy sản phẩm phù hợp với bộ lọc.</p>
               <button type="button" onClick={() => setFilter(EMPTY_FILTER)} className="frost-btn-ghost mt-4">
@@ -365,15 +388,15 @@ const ProductsPage: React.FC = () => {
       {/* Điện thoại: bộ lọc dạng ngăn kéo */}
       {filtersOpen && (
         <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="Bộ lọc sản phẩm">
-          <div className="absolute inset-0 bg-slate-950/50" onClick={() => setFiltersOpen(false)} />
-          <div className="absolute inset-y-0 right-0 flex w-[min(22rem,92vw)] flex-col bg-app shadow-xl">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setFiltersOpen(false)} />
+          <div ref={filterDialog} tabIndex={-1} className="absolute inset-y-0 right-0 flex w-[min(22rem,92vw)] flex-col bg-app shadow-xl">
             <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
               <p className="font-semibold text-slate-900">Bộ lọc · {filtered.length} sản phẩm</p>
               <button type="button" onClick={() => setFiltersOpen(false)} aria-label="Đóng bộ lọc" className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100">
                 <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-4">{filterPanel}</div>
+            <div className="flex-1 overflow-y-auto p-4">{filterPanel}</div><div className="border-t border-slate-200 bg-white p-4" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}><button type="button" onClick={() => setFiltersOpen(false)} className="frost-btn w-full">Xem {filtered.length} sản phẩm</button></div>
           </div>
         </div>
       )}
