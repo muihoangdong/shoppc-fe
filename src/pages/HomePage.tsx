@@ -13,10 +13,10 @@ import ProductCard from '../components/Products/ProductCard';
 import { PRODUCT_GRID } from '../utils/layout';
 
 const needs = [
-  { label: 'PC gaming', hint: 'Chơi game & giải trí', search: 'gaming', icon: ComputerDesktopIcon },
-  { label: 'Học tập', hint: 'Học online & làm bài', search: 'học', icon: AcademicCapIcon },
-  { label: 'Văn phòng', hint: 'Làm việc mỗi ngày', search: 'văn phòng', icon: BriefcaseIcon },
-  { label: 'Thiết kế', hint: 'Đồ họa & sáng tạo', search: 'đồ họa', icon: PaintBrushIcon },
+  { label: 'PC gaming', search: 'gaming', icon: ComputerDesktopIcon },
+  { label: 'Học tập', search: 'học', icon: AcademicCapIcon },
+  { label: 'Văn phòng', search: 'văn phòng', icon: BriefcaseIcon },
+  { label: 'Thiết kế', search: 'đồ họa', icon: PaintBrushIcon },
 ];
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -57,7 +57,7 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {needs.map(({ label, hint, search, icon: Icon }) => (
+          {needs.map(({ label, search, icon: Icon }) => (
             <Link
               key={label}
               to={`/products?type=pc&search=${encodeURIComponent(search)}`}
@@ -68,7 +68,6 @@ export default function HomePage() {
               </span>
               <span>
                 <span className="block text-sm font-semibold text-slate-900">{label}</span>
-                <span className="mt-1 hidden text-xs text-slate-500 sm:block">{hint}</span>
               </span>
             </Link>
           ))}
@@ -85,28 +84,24 @@ export default function HomePage() {
       {[
         {
           title: 'Sản phẩm nổi bật',
-          subtitle: 'Khám phá sản phẩm mới trong cửa hàng',
           list: products.slice(0, 8),
           href: '/products',
         },
         {
           title: 'PC Gaming & Văn phòng',
-          subtitle: 'Máy tính nguyên bộ cho từng nhu cầu',
           list: products.filter((p) => p.category_type === 'pc').slice(0, 4),
           href: '/products?type=pc',
         },
         {
           title: 'Linh kiện máy tính',
-          subtitle: 'Chọn linh kiện để hoàn thiện cấu hình',
           list: products.filter((p) => p.category_type === 'component').slice(0, 4),
           href: '/products?type=component',
         },
-      ].map(({ title, subtitle, list, href }) => (
+      ].map(({ title, list, href }) => (
         <section key={title}>
           <div className="mb-5 flex items-end justify-between gap-3">
             <div>
               <h2 className="text-xl font-semibold text-slate-900 sm:text-2xl">{title}</h2>
-              <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
             </div>
             <Link
               to={href}

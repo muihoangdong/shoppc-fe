@@ -256,9 +256,6 @@ const ProductsPage: React.FC = () => {
               <span className="h-1.5 w-1.5 rounded-full bg-blue-600" /> Tìm thấy {filtered.length} sản phẩm
             </span>
           </div>
-          <p className="mt-1 max-w-2xl text-sm text-slate-500">
-            Phần cứng chính hãng phân phối bởi AMD, Intel, ASUS, MSI, Corsair… Bảo hành chính hãng, đổi mới trong thời gian quy định.
-          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex rounded-lg border border-slate-200 bg-white p-0.5" role="group" aria-label="Kiểu hiển thị">

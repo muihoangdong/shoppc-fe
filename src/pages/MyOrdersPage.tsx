@@ -103,7 +103,6 @@ export default function MyOrdersPage() {
       <div className="mb-6 flex flex-wrap items-end justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Đơn hàng của tôi</h1>
-          <p className="text-sm text-gray-500">Theo dõi đơn đang giao và xem lại lịch sử mua hàng.</p>
         </div>
         <Link to="/account" className="text-sm font-medium text-blue-600 hover:underline">← Tài khoản</Link>
       </div>

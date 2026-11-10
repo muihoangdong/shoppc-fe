@@ -89,7 +89,6 @@ const ProductGallery: React.FC<Props> = ({ images, name, badge, onOpen3d }) => {
           <button type="button" disabled={!edges.right} aria-label="Cuộn ảnh thu nhỏ sang phải" onClick={() => thumbs.current?.scrollBy({ left: 240, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })} className="absolute -right-1 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-200 bg-white p-1 text-slate-600 shadow disabled:opacity-30"><ChevronRightIcon className="h-4 w-4" /></button>
         </div>
       )}
-      {images.length > 1 && <p className="mt-2 text-center text-[11px] text-slate-500">{index + 1}/{images.length} ảnh · Vuốt hoặc bấm mũi tên để xem thêm</p>}
       {zoomOpen && images.length > 0 && <ImageLightbox src={images[index]} images={images} initialIndex={index} onImageChange={setActive} alt={name} onClose={closeZoom} />}
     </section>
   );

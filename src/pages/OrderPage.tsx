@@ -138,7 +138,6 @@ export default function OrderPage() {
               {info.order_code}
             </button>
           </p>
-          <p className="mt-1 text-sm text-gray-500">Hãy lưu mã đơn và số điện thoại đặt hàng để tra cứu khi cần.</p>
         </div>
 
         {info.status === 'cancelled' ? (

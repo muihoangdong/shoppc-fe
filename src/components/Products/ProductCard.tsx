@@ -118,8 +118,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, view = 'grid' }) => 
         <span className="text-lg font-bold text-blue-600 sm:text-xl">{formatPrice(priceOf(product))}</span>
         {discount && <span className="rounded border border-red-200 bg-red-50 px-1 text-[10px] font-bold text-red-600">-{discount.percent}%</span>}
       </div>
-      <p className="text-[11px] text-slate-400">
-        {discount ? <span className="line-through">{formatPrice(discount.original)}</span> : outOfStock ? 'Giá niêm yết' : 'Giá cam kết tốt'}
+      <p className="min-h-4 text-[11px] text-slate-400">
+        {discount && <span className="line-through">{formatPrice(discount.original)}</span>}
       </p>
     </div>
   );

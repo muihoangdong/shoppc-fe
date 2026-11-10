@@ -133,7 +133,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
 
   return (
     <div className="space-y-4">
-      <Section title="Lọc thông số chuyên sâu">
+      {(specError || (filter.categories.length > 0 && specFacets.length > 0)) && <Section title="Lọc thông số chuyên sâu">
         {specError && (
           <div className="mb-3 text-xs text-red-600" role="alert">
             Không tải được thông số.{' '}
@@ -142,13 +142,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
             </button>
           </div>
         )}
-        {!filter.categories.length ? (
-          <p className="text-xs text-slate-500">Chọn một danh mục cụ thể bên dưới để lọc thông số của linh kiện.</p>
-        ) : !specFacets.length ? (
-          <p className="text-xs text-slate-500">
-            Danh mục chưa có thông số chuẩn để lọc. Bạn vẫn có thể lọc hãng và giá.
-          </p>
-        ) : (
+        {filter.categories.length > 0 && specFacets.length > 0 && (
           <div className="space-y-4">
             {specFacets.map((facet) => {
               const selection = filter.specs?.[facet.id] || {};
@@ -211,9 +205,9 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
             })}
           </div>
         )}
-      </Section>
+      </Section>}
       {/* Bộ lọc đang chọn */}
-      <section className="frost-card p-4">
+      {chips.length > 0 && <section className="frost-card p-4">
         <div className="flex items-start justify-between gap-2">
           <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
             <FunnelIcon className="h-5 w-5 text-blue-600" /> Bộ lọc tuyển chọn
@@ -241,10 +235,8 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
               </button>
             ))}
           </div>
-        ) : (
-          <p className="mt-1 text-xs text-slate-500">Chọn nhóm, danh mục, hãng hoặc khoảng giá để lọc nhanh.</p>
-        )}
-      </section>
+        ) : null}
+      </section>}
 
       <Section title="Nhóm sản phẩm" action={<AdjustmentsHorizontalIcon className="h-4 w-4 text-blue-600" />}>
         <ul className="space-y-1">
