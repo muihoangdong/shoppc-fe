@@ -26,6 +26,7 @@ export interface Product {
   category_name?: string;
   category_type?: string;
   image_url?: string;
+  image_urls?: string[];
   specs: ProductSpecs;
   /** Giá niêm yết trước giảm (lớn hơn price thì hiện gạch ngang + % giảm) */
   original_price?: number | string | null;

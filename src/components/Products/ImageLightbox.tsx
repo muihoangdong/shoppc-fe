@@ -1,11 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, ChevronRightIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface ImageLightboxProps {
   src: string;
   alt: string;
   onClose: () => void;
+  images?: string[];
+  initialIndex?: number;
+  onImageChange?: (index: number) => void;
 }
 
 const ZOOM = 2.5;
@@ -14,11 +17,34 @@ const ZOOM = 2.5;
  * Xem ảnh sản phẩm toàn màn hình. Bấm vào ảnh (hoặc nút kính lúp) để phóng to 2,5 lần đúng chỗ bấm,
  * rê chuột / kéo ngón tay để xem các phần khác. Esc, nút X hoặc bấm ra ngoài để đóng.
  */
-const ImageLightbox: React.FC<ImageLightboxProps> = ({ src, alt, onClose }) => {
+const ImageLightbox: React.FC<ImageLightboxProps> = ({ src, alt, onClose, images, initialIndex = 0, onImageChange }) => {
+  const photos = images?.length ? images : [src];
+  const [index, setIndex] = useState(initialIndex);
   const [zoomed, setZoomed] = useState(false);
   const [origin, setOrigin] = useState({ x: 50, y: 50 });
   const frameRef = useRef<HTMLDivElement>(null); // khung không phóng to: đo vị trí chuột theo khung, không theo ảnh đã phóng
   const closeRef = useRef<HTMLButtonElement>(null);
+  const move = useCallback((delta: number) => {
+    setIndex((current) => (current + delta + photos.length) % photos.length);
+    setZoomed(false);
+    setOrigin({ x: 50, y: 50 });
+  }, [photos.length]);
+  useEffect(() => { onImageChange?.(index); }, [index, onImageChange]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); move(-1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); move(1); }
+      if (e.key === 'Tab') {
+        const buttons = closeRef.current?.closest('[role="dialog"]')?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)');
+        if (!buttons?.length) return;
+        const first = buttons[0], last = buttons[buttons.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [move]);
 
   // Esc đóng; khóa cuộn trang phía sau; trả focus về chỗ cũ khi đóng
   useEffect(() => {
@@ -77,8 +103,8 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ src, alt, onClose }) => {
 
       <div ref={frameRef} className="max-h-full max-w-full overflow-hidden rounded-lg bg-white" onClick={(e) => e.stopPropagation()}>
         <img
-          src={src}
-          alt={alt}
+          src={photos[Math.min(index, photos.length - 1)]}
+          alt={`${alt} — ảnh ${index + 1}`}
           draggable={false}
           onClick={toggleZoom}
           onMouseMove={(e) => zoomed && pointAt(e.clientX, e.clientY)}
@@ -87,6 +113,12 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({ src, alt, onClose }) => {
           className={`block max-h-[85vh] max-w-[92vw] select-none object-contain transition-transform duration-200 ease-out ${zoomed ? 'cursor-zoom-out touch-none' : 'cursor-zoom-in'}`}
         />
       </div>
+
+      {photos.length > 1 && <>
+        <button type="button" aria-label="Ảnh trước trong chế độ phóng to" onClick={(e) => { e.stopPropagation(); move(-1); }} className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/80 sm:left-5"><ChevronLeftIcon className="h-7 w-7" /></button>
+        <button type="button" aria-label="Ảnh tiếp theo trong chế độ phóng to" onClick={(e) => { e.stopPropagation(); move(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/80 sm:right-5"><ChevronRightIcon className="h-7 w-7" /></button>
+        <span aria-live="polite" className="absolute left-3 top-4 rounded-full bg-black/50 px-3 py-1 text-sm text-white">{index + 1}/{photos.length}</span>
+      </>}
 
       <p className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-center text-xs text-white">
         {zoomed ? 'Rê chuột / kéo để xem chi tiết · bấm để thu nhỏ' : 'Bấm vào ảnh để phóng to · bấm ✕ hoặc Esc để đóng'}
