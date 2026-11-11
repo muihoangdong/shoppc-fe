@@ -317,11 +317,11 @@ const Product3DViewer: React.FC<Props> = ({ product, onClose, preferAr = false }
             )}
           </div>
 
-          <ul className="space-y-1.5 text-xs text-slate-500">
+          {/* <ul className="space-y-1.5 text-xs text-slate-500">
             <li>• Kéo để xoay · cuộn chuột / chụm hai ngón để phóng to</li>
             <li>• Nhấp đúp vào một điểm để lấy nét</li>
             <li>• Màu sắc hiển thị có thể khác thực tế đôi chút do ánh sáng màn hình.</li>
-          </ul>
+          </ul> */}
         </aside>
 
         <div className="border-t border-slate-200 bg-white px-4 py-2 text-center text-[11px] text-slate-500 lg:hidden">
