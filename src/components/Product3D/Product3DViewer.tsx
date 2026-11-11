@@ -214,7 +214,7 @@ const Product3DViewer: React.FC<Props> = ({ product, onClose, preferAr = false }
                     Cao {cm(dims.y)}
                   </span>
                   <span slot="hotspot-depth" data-position={`${dims.cx + dims.x / 2} ${dims.cy - dims.y / 2} ${dims.cz}`} data-normal="1 0 0" className={dimLabel}>
-                    Sâu {cm(dims.z)}
+                    Dài {cm(dims.z)}
                   </span>
                 </>
               )}
@@ -282,9 +282,9 @@ const Product3DViewer: React.FC<Props> = ({ product, onClose, preferAr = false }
               <dl className="grid grid-cols-3 gap-2 text-center">
                 {(
                   [
+                    ['Dài', dims.z],
                     ['Rộng', dims.x],
                     ['Cao', dims.y],
-                    ['Sâu', dims.z],
                   ] as const
                 ).map(([k, v]) => (
                   <div key={k} className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-2">
