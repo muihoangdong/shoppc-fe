@@ -164,7 +164,7 @@ const Header: React.FC = () => {
               <Link
                 key={item.to}
                 to={item.to}
-                className={`text-sm font-medium transition-colors ${navActive(item.type) ? 'text-blue-600' : 'text-slate-600 hover:text-blue-600'}`}
+                className={`text-sm font-semibold transition-colors ${navActive(item.type) ? 'text-blue-600' : 'text-slate-600 hover:text-blue-600'}`}
               >
                 {item.label}
               </Link>
@@ -222,14 +222,14 @@ const Header: React.FC = () => {
                     <p className="truncate text-sm font-semibold text-slate-900">{displayName}</p>
                     <p className="truncate text-xs text-slate-500">{user?.email}</p>
                   </div>
-                  <Link to="/account" className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                  <Link to="/account" className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                     <UserCircleIcon className="h-4 w-4" /> Tài khoản của tôi
                   </Link>
-                  <Link to="/account/orders" className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                  <Link to="/account/orders" className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                     <ClipboardDocumentListIcon className="h-4 w-4" /> Đơn hàng của tôi
                   </Link>
-                  {CUSTOMER_LINKS.map(([to, label]) => <Link key={to} to={to} onClick={() => { setUserMenu(false); setIsMobileMenuOpen(false); }} className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">{label}</Link>)}
-                  <button onClick={handleLogout} className="flex w-full items-center gap-2 border-t border-slate-200 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                  {CUSTOMER_LINKS.map(([to, label]) => <Link key={to} to={to} onClick={() => { setUserMenu(false); setIsMobileMenuOpen(false); }} className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">{label}</Link>)}
+                  <button onClick={handleLogout} className="flex w-full items-center gap-2 border-t border-slate-200 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50">
                     <ArrowRightOnRectangleIcon className="h-4 w-4" /> Đăng xuất
                   </button>
                 </div>
@@ -266,7 +266,7 @@ const Header: React.FC = () => {
         {/* Đường dẫn + thông tin cửa hàng */}
         <div className="border-t border-slate-200 bg-slate-50/80">
           <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-1.5 text-[11px] text-slate-500">
-            <nav aria-label="Đường dẫn" className="flex min-w-0 items-center gap-1.5 truncate">
+            <nav aria-label="Đường dẫn" className="flex min-w-0 items-center gap-1.5 truncate font-medium">
               <Link to="/" className="flex items-center gap-1 hover:text-blue-600">
                 <HomeIcon className="h-3.5 w-3.5" /> Trang chủ
               </Link>
@@ -314,12 +314,12 @@ const Header: React.FC = () => {
               </button>
             </div>
             <nav className="flex flex-col gap-1 p-3">
-              <p className="frost-label px-3 pb-1 pt-2">Danh mục</p>
+              <p className="frost-label px-3 pb-1 pt-2 font-semibold">Danh mục</p>
               {NAV.map((item) => (
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`rounded-lg px-3 py-2.5 text-sm font-medium ${navActive(item.type) ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'}`}
+                  className={`rounded-lg px-3 py-2.5 text-sm font-semibold ${navActive(item.type) ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'}`}
                 >
                   {item.label}
                 </Link>
@@ -328,23 +328,23 @@ const Header: React.FC = () => {
                 <CpuChipIcon className="h-4 w-4" /> Cấu hình PC
               </Link>
 
-              <p className="frost-label px-3 pb-1 pt-5">Tài khoản</p>
+              <p className="frost-label px-3 pb-1 pt-5 font-semibold">Tài khoản</p>
               {isAuthenticated ? (
                 <>
-                  <Link to="/account" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                  <Link to="/account" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-xs font-bold text-white">{getInitial()}</span>
                     <span className="truncate">{displayName}</span>
                   </Link>
-                  <Link to="/account/orders" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                  <Link to="/account/orders" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                     <ClipboardDocumentListIcon className="h-5 w-5" /> Đơn hàng của tôi
                   </Link>
-                  {CUSTOMER_LINKS.map(([to, label]) => <Link key={to} to={to} onClick={() => { setUserMenu(false); setIsMobileMenuOpen(false); }} className="block rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50">{label}</Link>)}
-                  <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                  {CUSTOMER_LINKS.map(([to, label]) => <Link key={to} to={to} onClick={() => { setUserMenu(false); setIsMobileMenuOpen(false); }} className="block rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">{label}</Link>)}
+                  <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50">
                     <ArrowRightOnRectangleIcon className="h-5 w-5" /> Đăng xuất
                   </button>
                 </>
               ) : (
-                <Link to="/login" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50">
+                <Link to="/login" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                   <UserCircleIcon className="h-5 w-5" /> Đăng nhập
                 </Link>
               )}
@@ -353,7 +353,7 @@ const Header: React.FC = () => {
                   setIsCartOpen(true);
                   setIsMobileMenuOpen(false);
                 }}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
                 <ShoppingCartIcon className="h-5 w-5" /> Giỏ hàng ({cart.total_items})
               </button>

@@ -5,8 +5,6 @@ interface LogoProps {
   variant?: 'light' | 'default';
   /** Chỉ hiện biểu tượng, không hiện chữ */
   markOnly?: boolean;
-  /** Ẩn dòng chữ phụ "STARFORGE FROST" */
-  compact?: boolean;
   className?: string;
 }
 
@@ -29,7 +27,7 @@ export const LogoMark: React.FC<{ className?: string }> = ({ className = 'h-10 w
   );
 };
 
-const Logo: React.FC<LogoProps> = ({ variant = 'default', markOnly = false, compact = false, className = '' }) => (
+const Logo: React.FC<LogoProps> = ({ variant = 'default', markOnly = false, className = '' }) => (
   <span className={`inline-flex items-center gap-2.5 ${className}`}>
     <LogoMark className="h-9 w-9 shrink-0 rounded-[12px] shadow-sm" />
     {!markOnly && (
@@ -37,12 +35,6 @@ const Logo: React.FC<LogoProps> = ({ variant = 'default', markOnly = false, comp
         <span className={`text-xl font-extrabold tracking-tight ${variant === 'light' ? 'text-white' : 'text-slate-900'}`}>
           SHOP<span className={variant === 'light' ? 'text-sky-300' : 'text-blue-600'}>PC</span>
         </span>
-        {!compact && (
-          <span className={`mt-1 flex items-center gap-1 text-[9px] font-semibold tracking-[0.2em] ${variant === 'light' ? 'text-white/70' : 'text-blue-600'}`}>
-            STARFORGE FROST
-            <span className="h-1 w-1 rounded-full bg-current" />
-          </span>
-        )}
       </span>
     )}
     <span className="sr-only">Shoppc - Trang chủ</span>

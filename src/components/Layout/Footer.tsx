@@ -28,11 +28,11 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto border-t border-slate-200 bg-white">
+    <footer className="mt-auto border-t border-slate-200 bg-white font-normal">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Logo compact className="mb-4" />
+            <Logo className="mb-4" />
             <p className="text-sm leading-relaxed text-slate-500">
               Cửa hàng máy tính và linh kiện chính hãng. Tư vấn cấu hình, lắp ráp và bảo hành tận nơi với giá tốt nhất.
             </p>
@@ -40,11 +40,11 @@ const Footer: React.FC = () => {
 
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <h3 className="frost-label mb-4 !text-slate-800">{col.title}</h3>
+              <h3 className="frost-label mb-4 font-semibold !text-slate-800">{col.title}</h3>
               <ul className="space-y-2.5">
                 {col.links.map((l) => (
                   <li key={l.label}>
-                    <Link to={l.to} className="text-sm text-slate-500 transition-colors hover:text-blue-600">
+                    <Link to={l.to} className="text-sm font-medium text-slate-500 transition-colors hover:text-blue-600">
                       {l.label}
                     </Link>
                   </li>
@@ -54,7 +54,7 @@ const Footer: React.FC = () => {
           ))}
 
           <div>
-            <h3 className="frost-label mb-4 !text-slate-800">Hệ thống Shoppc</h3>
+            <h3 className="frost-label mb-4 font-semibold !text-slate-800">Hệ thống Shoppc</h3>
             <ul className="space-y-2.5 text-sm text-slate-500">
               <li className="flex items-start gap-2">
                 <MapPinIcon className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
@@ -62,7 +62,7 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-center gap-2">
                 <PhoneIcon className="h-4 w-4 shrink-0 text-blue-600" />
-                <a href="tel:0354334944" className="hover:text-blue-600">
+                <a href="tel:0354334944" className="font-medium hover:text-blue-600">
                   Hotline: 0354 334 944
                 </a>
               </li>
@@ -83,13 +83,13 @@ const Footer: React.FC = () => {
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-6 text-[11px] text-slate-500 md:flex-row">
           <p>© {currentYear} Shoppc Hardware Platform. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-5">
-            <Link to="/terms" className="hover:text-blue-600">
+            <Link to="/terms" className="font-medium hover:text-blue-600">
               Điều khoản dịch vụ
             </Link>
-            <Link to="/privacy" className="hover:text-blue-600">
+            <Link to="/privacy" className="font-medium hover:text-blue-600">
               Bảo mật thông tin
             </Link>
-            <Link to="/return" className="hover:text-blue-600">
+            <Link to="/return" className="font-medium hover:text-blue-600">
               Chính sách đổi trả
             </Link>
           </div>
