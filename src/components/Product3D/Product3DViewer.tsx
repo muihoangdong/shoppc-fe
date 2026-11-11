@@ -306,7 +306,7 @@ const Product3DViewer: React.FC<Props> = ({ product, onClose, preferAr = false }
             ) : (
               <>
                 <p className="mt-1 text-xs text-slate-600">
-                  Quét mã bằng camera điện thoại (Android có ARCore hoặc iPhone/iPad) để đặt sản phẩm đúng kích thước lên bàn của bạn.
+                  Quét mã bằng camera điện thoại để đặt sản phẩm đúng kích thước lên bàn của bạn.
                 </p>
                 {qr ? (
                   <img src={qr} alt="Mã QR mở trình xem AR trên điện thoại" className="mx-auto mt-3 h-40 w-40 rounded-lg border border-slate-200 bg-white p-1" />
@@ -316,17 +316,13 @@ const Product3DViewer: React.FC<Props> = ({ product, onClose, preferAr = false }
               </>
             )}
           </div>
-
-          {/* <ul className="space-y-1.5 text-xs text-slate-500">
-            <li>• Kéo để xoay · cuộn chuột / chụm hai ngón để phóng to</li>
-            <li>• Nhấp đúp vào một điểm để lấy nét</li>
-            <li>• Màu sắc hiển thị có thể khác thực tế đôi chút do ánh sáng màn hình.</li>
-          </ul> */}
         </aside>
 
-        <div className="border-t border-slate-200 bg-white px-4 py-2 text-center text-[11px] text-slate-500 lg:hidden">
-          {arReady === false && isMobile() ? 'Thiết bị này chưa hỗ trợ AR — bạn vẫn xoay, phóng to mô hình 3D được.' : 'Kéo để xoay · chụm hai ngón để phóng to'}
-        </div>
+        {arReady === false && isMobile() && (
+          <div className="border-t border-slate-200 bg-white px-4 py-2 text-center text-[11px] text-slate-500 lg:hidden">
+            Thiết bị này chưa hỗ trợ AR — bạn vẫn xoay, phóng to mô hình 3D được.
+          </div>
+        )}
       </div>
     </div>,
     document.body
