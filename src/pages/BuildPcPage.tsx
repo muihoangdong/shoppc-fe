@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   CpuChipIcon,
@@ -25,6 +25,7 @@ import { cartService } from '../services/cartService';
 import { useCart } from '../hooks/useCart';
 import { formatPrice } from '../utils/formatters';
 import { errorStatus } from '../services/api';
+import { isPcPurpose } from '../utils/pcSuggestions';
 
 const ICONS: Record<string, React.ElementType> = {
   cpu: CpuChipIcon,
@@ -78,6 +79,7 @@ const IssueIcon = ({ level }: { level: string }) =>
 
 export default function BuildPcPage() {
   const { refreshCart } = useCart();
+  const [searchParams] = useSearchParams();
   const [config, setConfig] = useState<BuilderConfig | null>(null);
   const [configError, setConfigError] = useState(false);
   const [selection, setSelection] = useState<BuildSelection>(loadSaved);
@@ -91,8 +93,14 @@ export default function BuildPcPage() {
   const [onlyCompatible, setOnlyCompatible] = useState(true);
 
   // AI
-  const [budget, setBudget] = useState('20000000');
-  const [purpose, setPurpose] = useState('gaming');
+  const [budget, setBudget] = useState(() => {
+    const amount = Number(searchParams.get('budget'));
+    return Number.isSafeInteger(amount) && amount > 0 ? String(amount) : '20000000';
+  });
+  const [purpose, setPurpose] = useState<string>(() => {
+    const requested = searchParams.get('purpose');
+    return isPcPurpose(requested) ? requested : 'gaming';
+  });
   const [note, setNote] = useState('');
   const [aiBusy, setAiBusy] = useState(false);
   const [aiExplanation, setAiExplanation] = useState('');
