@@ -49,6 +49,7 @@ export interface Model3dConfig {
   usdz_url?: string;
   /** Ảnh hiện trong lúc tải mô hình (trống: ảnh sản phẩm) */
   poster_url?: string;
+  dimensions_cm?: Partial<Record<'length' | 'width' | 'height', number>>;
   /** false = tạm ẩn 3D */
   enabled?: boolean;
 }

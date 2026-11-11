@@ -29,7 +29,7 @@ type Phase = 'loading' | 'ready' | 'error';
 
 /**
  * Trình xem mô hình 3D + AR bằng Google <model-viewer> (giống trang sản phẩm IKEA):
- *  - kéo để xoay, cuộn / chụm hai ngón để phóng to, tự xoay, hiện kích thước thật đọc từ file GLB;
+ *  - kéo để xoay, cuộn / chụm hai ngón để phóng to, tự xoay, hiện kích thước do admin nhập hoặc đọc từ file GLB;
  *  - "Xem trong không gian của bạn": Android (WebXR, Scene Viewer) và iPhone/iPad (AR Quick Look,
  *    dùng file USDZ nếu có, không thì model-viewer tự chuyển từ GLB) — đặt sản phẩm đúng tỉ lệ thật;
  *  - máy tính: hiện mã QR để mở ngay trang này trên điện thoại.
@@ -144,7 +144,12 @@ const Product3DViewer: React.FC<Props> = ({ product, onClose, preferAr = false }
     if (mv?.canActivateAR) void mv.activateAR();
   };
 
-  const cm = (m: number) => `${(m * 100).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} cm`;
+  const formatDimension = (key: 'length' | 'width' | 'height', meters: number) => {
+    const override = model.dimensions_cm?.[key];
+    const cm = override ?? meters * 100;
+    const options = override === undefined ? { maximumFractionDigits: 1 } : { maximumSignificantDigits: 21 };
+    return `${cm.toLocaleString('vi-VN', options)} cm`;
+  };
   const dimLabel = 'pointer-events-none whitespace-nowrap rounded-md bg-blue-600 px-2 py-0.5 text-[11px] font-semibold text-white shadow';
 
   return createPortal(
@@ -208,13 +213,13 @@ const Product3DViewer: React.FC<Props> = ({ product, onClose, preferAr = false }
               {showDims && dims && (
                 <>
                   <span slot="hotspot-width" data-position={`${dims.cx} ${dims.cy - dims.y / 2} ${dims.cz + dims.z / 2}`} data-normal="0 -1 0" className={dimLabel}>
-                    Rộng {cm(dims.x)}
+                    Rộng {formatDimension('width', dims.x)}
                   </span>
                   <span slot="hotspot-height" data-position={`${dims.cx + dims.x / 2} ${dims.cy} ${dims.cz + dims.z / 2}`} data-normal="1 0 0" className={dimLabel}>
-                    Cao {cm(dims.y)}
+                    Cao {formatDimension('height', dims.y)}
                   </span>
                   <span slot="hotspot-depth" data-position={`${dims.cx + dims.x / 2} ${dims.cy - dims.y / 2} ${dims.cz}`} data-normal="1 0 0" className={dimLabel}>
-                    Dài {cm(dims.z)}
+                    Dài {formatDimension('length', dims.z)}
                   </span>
                 </>
               )}
@@ -282,14 +287,14 @@ const Product3DViewer: React.FC<Props> = ({ product, onClose, preferAr = false }
               <dl className="grid grid-cols-3 gap-2 text-center">
                 {(
                   [
-                    ['Dài', dims.z],
-                    ['Rộng', dims.x],
-                    ['Cao', dims.y],
+                    ['Dài', 'length', dims.z],
+                    ['Rộng', 'width', dims.x],
+                    ['Cao', 'height', dims.y],
                   ] as const
-                ).map(([k, v]) => (
-                  <div key={k} className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-2">
-                    <dt className="text-[11px] text-slate-500">{k}</dt>
-                    <dd className="text-sm font-semibold text-slate-900">{cm(v)}</dd>
+                ).map(([label, key, meters]) => (
+                  <div key={key} className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-2">
+                    <dt className="text-[11px] text-slate-500">{label}</dt>
+                    <dd className="text-sm font-semibold text-slate-900">{formatDimension(key, meters)}</dd>
                   </div>
                 ))}
               </dl>
