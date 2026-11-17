@@ -9,7 +9,7 @@ interface LogoProps {
 }
 
 export const LogoMark: React.FC<{ className?: string }> = ({ className = 'h-10 w-10' }) => (
-  <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className={className} />
+  <img src={`${import.meta.env.BASE_URL}favicon.svg?v=teal`} alt="" className={className} />
 );
 
 const Logo: React.FC<LogoProps> = ({ variant = 'default', markOnly = false, className = '' }) => (
@@ -18,7 +18,7 @@ const Logo: React.FC<LogoProps> = ({ variant = 'default', markOnly = false, clas
     {markOnly ? (
       <span className="sr-only">Shoppc</span>
     ) : (
-      <span className={`text-base font-extrabold leading-none tracking-[0.1em] sm:text-lg ${variant === 'light' ? 'text-white' : 'text-black dark:text-white'}`}>
+      <span className={`text-base font-extrabold leading-none tracking-[0.1em] sm:text-lg ${variant === 'light' ? 'text-white' : 'text-primary-600'}`}>
         SHOPPC
       </span>
     )}
