@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import React from 'react';
 
 interface LogoProps {
   /** "light": chữ trắng (đặt trên nền màu/tối). "default": chữ đậm theo giao diện sáng/tối. */
@@ -8,36 +8,20 @@ interface LogoProps {
   className?: string;
 }
 
-/** Biểu tượng Shoppc "Starforge Frost": tinh thể băng 4 cánh trên nền xanh băng (cùng hình với public/favicon.svg). */
-export const LogoMark: React.FC<{ className?: string }> = ({ className = 'h-10 w-10' }) => {
-  const id = useId();
-  return (
-    <svg viewBox="0 0 64 64" className={className} aria-hidden="true" focusable="false">
-      <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#1aa3f5" />
-          <stop offset="1" stopColor="#1e40af" />
-        </linearGradient>
-      </defs>
-      <rect width="64" height="64" rx="14" fill={`url(#${id})`} />
-      <path d="M32 12 36 28 52 32 36 36 32 52 28 36 12 32 28 28Z" fill="#fff" />
-      <path d="M45 15 41.5 24.5 49 19M19 45l3.5-9.5L15 41" stroke="#bfe6ff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <circle cx="32" cy="32" r="3.2" fill="#1aa3f5" />
-    </svg>
-  );
-};
+export const LogoMark: React.FC<{ className?: string }> = ({ className = 'h-10 w-10' }) => (
+  <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className={className} />
+);
 
 const Logo: React.FC<LogoProps> = ({ variant = 'default', markOnly = false, className = '' }) => (
-  <span className={`inline-flex items-center gap-2.5 ${className}`}>
-    <LogoMark className="h-9 w-9 shrink-0 rounded-[12px] shadow-sm" />
-    {!markOnly && (
-      <span className="flex flex-col leading-none">
-        <span className={`text-xl font-extrabold tracking-tight ${variant === 'light' ? 'text-white' : 'text-slate-900'}`}>
-          SHOP<span className={variant === 'light' ? 'text-sky-300' : 'text-blue-600'}>PC</span>
-        </span>
+  <span className={`inline-flex items-center gap-2 ${className}`}>
+    <LogoMark className="h-9 w-9 shrink-0" />
+    {markOnly ? (
+      <span className="sr-only">Shoppc</span>
+    ) : (
+      <span className={`text-base font-extrabold leading-none tracking-[0.1em] sm:text-lg ${variant === 'light' ? 'text-white' : 'text-black dark:text-white'}`}>
+        SHOPPC
       </span>
     )}
-    <span className="sr-only">Shoppc - Trang chủ</span>
   </span>
 );
 
