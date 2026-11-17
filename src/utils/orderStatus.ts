@@ -11,8 +11,8 @@ export const STATUS_LABEL: Record<OrderStatus, string> = {
 
 export const STATUS_BADGE: Record<OrderStatus, string> = {
   pending: 'bg-amber-100 text-amber-800',
-  processing: 'bg-blue-100 text-blue-800',
-  shipped: 'bg-indigo-100 text-indigo-800',
+  processing: 'bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200',
+  shipped: 'bg-purple-100 text-purple-800',
   delivered: 'bg-green-100 text-green-800',
   completed: 'bg-green-100 text-green-800',
   cancelled: 'bg-gray-200 text-gray-700',

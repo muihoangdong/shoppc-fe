@@ -135,7 +135,7 @@ function App() {
               },
               loading: {
                 style: {
-                  background: '#6366f1',
+                  background: 'rgb(var(--c-indigo-600))',
                   color: '#fff',
                 },
               },
