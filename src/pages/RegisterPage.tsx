@@ -155,7 +155,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-600 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-600 flex items-center justify-center p-4 dark:bg-app dark:bg-none">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         {otpInfo ? (
           /* ───────── Bước 2: nhập mã OTP ───────── */
